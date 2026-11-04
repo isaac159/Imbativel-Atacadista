@@ -1,0 +1,48 @@
+{
+  "agente": "Benjamim",
+  "tipo": "Função de fluxo",
+  "nome": "encaminhar_vendedor",
+  "descricao": "Chame quando o cliente precisa do vendedor e não é um pedido confirmado: acompanhar pedido já feito, problema de entrega, dúvida financeira de cliente cadastrado, preço que não está na base, pedido de falar com o vendedor, troca de vendedor ou de dia de rota. Antes de chamar, pergunte o motivo se ele não disse. Dúvida financeira de contato sem cadastro: o sistema leva à gerência.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "motivo": {
+        "type": "string",
+        "enum": [
+          "acompanhamento_pedido",
+          "problema_logistico",
+          "financeiro",
+          "pediu_vendedor",
+          "preco_fora_da_base",
+          "troca_vendedor_ou_rota",
+          "duvida_sem_resposta",
+          "outro"
+        ]
+      },
+      "resumo": {
+        "type": "string",
+        "description": "1 a 3 frases: o que o cliente quer e o que já foi dito"
+      },
+      "dados_pedido": {
+        "type": "string",
+        "description": "Número, data ou itens do pedido citado; vazio se não se aplica"
+      },
+      "urgencia": {
+        "type": "string",
+        "enum": [
+          "normal",
+          "alta"
+        ]
+      }
+    },
+    "required": [
+      "motivo",
+      "resumo",
+      "urgencia"
+    ]
+  },
+  "avancado": {
+    "encerrar_run_apos_executar": true
+  },
+  "exemplos": "nenhum na v1 (com 3 ou mais o classifier passa a filtrar a função)"
+}

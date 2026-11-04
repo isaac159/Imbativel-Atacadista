@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Resumo dos preços · Portal Imbatível</title>
+  <link rel="icon" href="assets/logo-imbativel-quadrado.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body class="oculto" id="corpo">
+  <div class="fundo">
+  <header class="topo">
+    <div class="dentro">
+      <div class="marcas"><img src="assets/logo-imbativel.webp" alt="Imbatível Atacadista"><span class="divisa"></span><img class="matte" src="assets/logo-matte.png" alt="Matte"></div>
+      <nav><a href="/painel">Atualizar arquivos</a><a href="/resumo" aria-current="page">Resumo dos preços</a></nav>
+      <div class="usuario"><span id="quem"></span><button class="botao vidro" id="sair" type="button">Sair</button></div>
+    </div>
+  </header>
+
+  <main class="conteudo">
+    <nav class="abas-pagina"><a href="/painel">Atualizar arquivos</a><a href="/resumo" aria-current="page">Resumo dos preços</a></nav>
+    <div class="cabecalho">
+      <span class="selo simples">O que o Benjamim usa agora</span>
+      <h1 class="titulo">Resumo dos <span class="apagado">preços</span></h1>
+      <p class="sub">Quantos produtos e ofertas estão valendo, o que mudou no último envio e a lista completa para conferir.</p>
+    </div>
+
+    <div class="aviso oculto" id="aviso" role="status"></div>
+
+    <div class="numeros">
+      <article class="numero vidro-cartao"><div class="rot">Produtos na tabela</div><div class="val" id="n-produtos">–</div><div class="det" id="d-produtos"></div></article>
+      <article class="numero vidro-cartao"><div class="rot">Ofertas no ar</div><div class="val" id="n-ofertas">–</div><div class="det" id="d-ofertas"></div></article>
+      <article class="numero vidro-cartao"><div class="rot">Preços que mudaram</div><div class="val" id="n-mudaram">–</div><div class="det" id="d-mudaram"></div></article>
+      <article class="numero vidro-cartao"><div class="rot">Produtos novos</div><div class="val" id="n-novos">–</div><div class="det" id="d-novos"></div></article>
+    </div>
+
+    <section class="secao">
+      <div class="secao-cab">
+        <div><h2>O que mudou no último envio</h2><p id="p-mudou"></p></div>
+        <div class="chaves" data-grupo="mudou"><button type="button" data-v="tabela" aria-pressed="true">Tabela</button><button type="button" data-v="ofertas" aria-pressed="false">Ofertas</button></div>
+      </div>
+      <div class="lista-tab vidro-cartao"><div class="rolar"><table>
+        <thead><tr><th>Produto</th><th class="num">Antes</th><th class="num">Agora</th><th class="num">Mudança</th></tr></thead>
+        <tbody id="t-mudou"></tbody>
+      </table></div><button class="mais oculto" id="mais-mudou" type="button"></button></div>
+    </section>
+
+    <section class="secao">
+      <div class="secao-cab">
+        <div><h2>Preços valendo agora</h2><p id="p-lista"></p></div>
+        <div class="filtros">
+          <label class="busca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="busca" type="search" placeholder="Buscar produto" aria-label="Buscar produto"></label>
+          <div class="chaves" data-grupo="lista"><button type="button" data-v="tabela" aria-pressed="true">Tabela</button><button type="button" data-v="ofertas" aria-pressed="false">Ofertas</button></div>
+        </div>
+      </div>
+      <div class="lista-tab vidro-cartao"><div class="rolar"><table>
+        <thead id="h-lista"></thead>
+        <tbody id="t-lista"></tbody>
+      </table></div><button class="mais oculto" id="mais-lista" type="button"></button></div>
+    </section>
+  </main>
+
+  <footer class="rodape-portal">
+    <div class="dentro"><span>Imbatível Atacadista · Jataizinho/PR</span><span>Portal do Benjamim · Matte</span></div>
+  </footer>
+  </div>
+
+  <script>
+    const PASSO = 50;
+    const estado = { mudou: 'tabela', lista: 'tabela', limMudou: PASSO, limLista: PASSO, busca: '' };
+    let D = null;
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const real = v => typeof v === 'number' ? v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '–';
+    const inteiro = v => Number(v || 0).toLocaleString('pt-BR');
+    const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const hojeISO = () => new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10);
+    const iso = s => { const m = String(s || '').match(/(\d{2})\/(\d{2})\/(\d{4})/); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; };
+    // "2026-11-03 14:20" → "03/11 às 14:20"; textos como "planilha inicial" passam direto
+    const quando = s => /^\d{4}-\d{2}-\d{2} /.test(s || '') ? `${s.slice(8, 10)}/${s.slice(5, 7)} às ${s.slice(11, 16)}` : (s || '');
+
+    fetch('/api/sessao').then(async r => {
+      if (!r.ok) return location.replace('/');
+      $('quem').textContent = (await r.json()).usuario;
+      $('corpo').classList.remove('oculto');
+      carregar();
+    }).catch(() => location.replace('/'));
+
+    $('sair').addEventListener('click', async () => {
+      await fetch('/api/sessao', { method: 'DELETE' }).catch(() => {});
+      location.replace('/');
+    });
+
+    async function carregar() {
+      try {
+        const r = await fetch('/api/resumo');
+        if (r.status === 401) return location.replace('/');
+        if (!r.ok) throw new Error();
+        D = await r.json();
+        D.ultTabela = D.historico.find(h => h.tabela) || null;
+        D.ultOfertas = D.historico.find(h => h.ofertas) || null;
+        numeros(); mudou(); lista();
+      } catch (e) {
+        $('aviso').className = 'aviso erro';
+        $('aviso').textContent = 'Não consegui carregar o resumo agora. Atualize a página em alguns minutos.';
+      }
+    }
+
+    function numeros() {
+      const p = D.precos, tab = p.tabela || { itens: [] }, of = p.ofertas || { itens: [] };
+      $('n-produtos').textContent = inteiro(tab.itens.length);
+      $('d-produtos').textContent = `Atualizada ${quando(p.tabela_atualizada_em)}` + (tab.validade ? ` · validade ${tab.validade}` : '');
+
+      const fim = of.validade && iso(of.validade.fim), ini = of.validade && iso(of.validade.inicio), hoje = hojeISO();
+      const vigente = fim && hoje <= fim && (!ini || hoje >= ini);
+      $('n-ofertas').textContent = vigente ? inteiro(of.itens.length) : '0';
+      const dOf = $('d-ofertas');
+      if (!fim) { dOf.textContent = 'Sem validade no PDF'; dOf.classList.add('alerta'); }
+      else if (hoje > fim) { dOf.textContent = `${of.itens.length} ofertas venceram em ${of.validade.fim}. Envie o PDF novo.`; dOf.classList.add('alerta'); }
+      else if (ini && hoje < ini) { dOf.textContent = `${of.itens.length} ofertas começam em ${of.validade.inicio}`; }
+      else {
+        const dias = Math.round((new Date(fim) - new Date(hoje)) / 864e5);
+        dOf.textContent = `Valem até ${of.validade.fim} · ` + (dias === 0 ? 'último dia' : dias === 1 ? 'falta 1 dia' : `faltam ${dias} dias`);
+        if (dias <= 1) dOf.classList.add('alerta');
+      }
+
+      const t = D.ultTabela && D.ultTabela.tabela;
+      $('n-mudaram').textContent = t ? inteiro(t.mudaram.length) : '–';
+      $('d-mudaram').textContent = t ? `Na tabela: ▲ ${t.subiram} ${t.subiram === 1 ? 'subiu' : 'subiram'} · ▼ ${t.baixaram} ${t.baixaram === 1 ? 'baixou' : 'baixaram'}` : 'Nenhuma tabela enviada pelo portal ainda';
+      $('n-novos').textContent = t ? inteiro(t.novos.length) : '–';
+      $('d-novos').textContent = t ? (t.sairam.length === 1 ? '1 saiu' : `${t.sairam.length} saíram`) + ' da tabela no mesmo envio' : 'Aparece após o primeiro envio';
+    }
+
+    function mudou() {
+      const env = estado.mudou === 'tabela' ? D.ultTabela : D.ultOfertas;
+      const c = env && env[estado.mudou];
+      const corpo = $('t-mudou'), mais = $('mais-mudou');
+      if (!c) {
+        $('p-mudou').textContent = '';
+        corpo.innerHTML = `<tr><td colspan="4" class="vazio">Nenhum envio ${estado.mudou === 'tabela' ? 'de tabela' : 'de ofertas'} pelo portal ainda.</td></tr>`;
+        mais.classList.add('oculto'); return;
+      }
+      $('p-mudou').textContent = `${env.arquivos.join(' + ')} · enviado por ${env.usuario} em ${quando(env.em)}`;
+      const linhas = [
+        ...c.mudaram.map(m => ({ p: m.produto, a: real(m.antes), g: real(m.agora), v: m.agora > m.antes ? `<span class="var sobe">▲ ${m.variacao != null ? '+' + String(m.variacao).replace('.', ',') + '%' : 'subiu'}</span>` : `<span class="var desce">▼ ${m.variacao != null ? String(m.variacao).replace('.', ',') + '%' : 'baixou'}</span>` })),
+        ...c.novos.map(n => ({ p: n.produto, a: '–', g: real(n.preco), v: '<span class="var novo">+ novo</span>' })),
+        ...c.sairam.map(n => ({ p: n.produto, a: real(n.preco), g: '–', v: '<span class="var saiu">− saiu</span>' }))
+      ];
+      if (!linhas.length) { corpo.innerHTML = '<tr><td colspan="4" class="vazio">Nada mudou: os preços são iguais aos do envio anterior.</td></tr>'; mais.classList.add('oculto'); return; }
+      corpo.innerHTML = linhas.slice(0, estado.limMudou).map(l =>
+        `<tr><td>${esc(l.p)}</td><td class="num ${l.a !== '–' && l.g !== '–' ? 'antes' : ''}">${l.a}</td><td class="num">${l.g}</td><td class="num">${l.v}</td></tr>`).join('');
+      mostrarMais(mais, linhas.length, estado.limMudou);
+    }
+
+    function lista() {
+      const p = D.precos, b = norm(estado.busca);
+      const corpo = $('t-lista'), mais = $('mais-lista');
+      let linhas, cab;
+      if (estado.lista === 'tabela') {
+        cab = '<tr><th>Cód.</th><th>Produto</th><th>Embalagem</th><th class="num">Preço</th></tr>';
+        const itens = (p.tabela && p.tabela.itens || []).filter(it => !b || norm(it.nome + ' ' + it.codigo + ' ' + it.categoria).includes(b));
+        $('p-lista').textContent = `${inteiro(itens.length)} produtos` + (b ? ' encontrados' : ' · atualizada ' + quando(p.tabela_atualizada_em));
+        linhas = itens.map(it => `<tr><td>${esc(it.codigo)}</td><td>${esc(it.nome)}<span class="sub2">${esc(it.categoria)}</span></td><td>${esc(it.unidade)} · ${esc(it.embalagem)}</td><td class="num">${real(it.preco)}</td></tr>`);
+      } else {
+        cab = '<tr><th>Oferta</th><th>Faixas de quantidade</th><th class="num">Preço</th></tr>';
+        const of = p.ofertas || { itens: [] };
+        const itens = (of.itens || []).filter(it => !b || norm(it.produto + ' ' + it.variacoes).includes(b));
+        $('p-lista').textContent = `${inteiro(itens.length)} ofertas` + (b ? ' encontradas' : of.validade ? ` · validade ${of.validade.inicio} a ${of.validade.fim}` : '');
+        linhas = itens.map(it => `<tr><td>${esc(it.produto)}${it.variacoes ? `<span class="sub2">${esc(it.variacoes)}</span>` : ''}</td><td>${(it.faixas || []).map(f => `${esc(f.condicao)}: <b>${real(f.preco)}</b>`).join('<br>') || '<span class="sub2">–</span>'}</td><td class="num">${real(it.preco_oferta)}</td></tr>`);
+      }
+      $('h-lista').innerHTML = cab;
+      corpo.innerHTML = linhas.length ? linhas.slice(0, estado.limLista).join('') : `<tr><td colspan="4" class="vazio">Nada encontrado para “${esc(estado.busca)}”.</td></tr>`;
+      mostrarMais(mais, linhas.length, estado.limLista);
+    }
+
+    function mostrarMais(botao, total, limite) {
+      botao.classList.toggle('oculto', total <= limite);
+      botao.textContent = `Mostrar mais (${inteiro(total - limite)} restantes)`;
+    }
+
+    $('mais-mudou').onclick = () => { estado.limMudou += PASSO; mudou(); };
+    $('mais-lista').onclick = () => { estado.limLista += PASSO; lista(); };
+    let tempo;
+    $('busca').addEventListener('input', e => { clearTimeout(tempo); tempo = setTimeout(() => { estado.busca = e.target.value.trim(); estado.limLista = PASSO; lista(); }, 150); });
+    document.querySelectorAll('.chaves').forEach(g => g.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b || !D) return;
+      g.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      const grupo = g.dataset.grupo;
+      estado[grupo] = b.dataset.v;
+      if (grupo === 'mudou') { estado.limMudou = PASSO; mudou(); } else { estado.limLista = PASSO; lista(); }
+    }));
+  </script>
+</body>
+</html>

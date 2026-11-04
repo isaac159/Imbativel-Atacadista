@@ -1,0 +1,47 @@
+{
+  "agente": "Benjamim",
+  "tipo": "Função de fluxo",
+  "nome": "encaminhar_fornecedor",
+  "descricao": "Chame quando um fornecedor, representante ou indústria quer vender para a Imbatível (setor de compras) e já informou nome, empresa, produtos e telefone. Pergunte pelo catálogo antes de chamar.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "nome_contato": {
+        "type": "string"
+      },
+      "empresa": {
+        "type": "string",
+        "description": "Empresa ou indústria representada"
+      },
+      "produtos_representados": {
+        "type": "string"
+      },
+      "catalogo_recebido": {
+        "type": "string",
+        "enum": [
+          "sim",
+          "nao"
+        ]
+      },
+      "telefone_contato": {
+        "type": "string",
+        "description": "Telefone ou WhatsApp informado; se for o mesmo desta conversa, escreva \"este número\""
+      },
+      "observacoes": {
+        "type": "string",
+        "description": "Vazio se nada"
+      }
+    },
+    "required": [
+      "nome_contato",
+      "empresa",
+      "produtos_representados",
+      "catalogo_recebido",
+      "telefone_contato"
+    ]
+  },
+  "avancado": {
+    "encerrar_run_apos_executar": true
+  },
+  "exemplos": "nenhum na v1 (com 3 ou mais o classifier passa a filtrar a função)"
+}

@@ -1,0 +1,7 @@
+{
+  "agente": "Benjamim",
+  "tipo": "Função de saída (já existe; só ajustar a Intenção)",
+  "nome": "transferir_para_atendente",
+  "intencao": "O cliente pediu para falar com uma pessoa, atendente ou humano sem dizer o motivo, ou disse que não quer falar com robô e não quis dizer o assunto.",
+  "enviar_mensagem_de_transferencia": "Sim"
+}

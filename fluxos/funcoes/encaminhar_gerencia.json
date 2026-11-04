@@ -1,0 +1,45 @@
+{
+  "agente": "Benjamim",
+  "tipo": "Função de fluxo",
+  "nome": "encaminhar_gerencia",
+  "descricao": "Chame para caso grave ou urgente (produto avariado em quantidade, reclamação séria, ameaça de cancelar, cobrança indevida), assunto que só a gerência resolve, ou dúvida financeira de contato SEM cadastro na carteira. Antes de chamar, pergunte o assunto. Cliente cadastrado com assunto financeiro ou logístico comum vai para encaminhar_vendedor. O sistema mantém o cliente cadastrado com o vendedor dele e avisa o gerente nos casos graves.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "motivo": {
+        "type": "string",
+        "enum": [
+          "problema_grave_urgente",
+          "financeiro_grave",
+          "financeiro_sem_cadastro",
+          "assunto_gerencia"
+        ]
+      },
+      "assunto": {
+        "type": "string",
+        "description": "Em poucas palavras, nas palavras do cliente"
+      },
+      "resumo": {
+        "type": "string",
+        "description": "1 a 3 frases para a gerência"
+      },
+      "urgencia": {
+        "type": "string",
+        "enum": [
+          "normal",
+          "alta"
+        ]
+      }
+    },
+    "required": [
+      "motivo",
+      "assunto",
+      "resumo",
+      "urgencia"
+    ]
+  },
+  "avancado": {
+    "encerrar_run_apos_executar": true
+  },
+  "exemplos": "nenhum na v1 (com 3 ou mais o classifier passa a filtrar a função)"
+}

@@ -1,0 +1,120 @@
+{
+  "agente": "Benjamim",
+  "tipo": "Função de fluxo",
+  "nome": "registrar_cadastro",
+  "descricao": "Chame quando um contato NOVO (CADASTRO NA CARTEIRA diferente de sim) é elegível e terminou o cadastro rápido: nome, estabelecimento, segmento, cidade/UF, entrega ou retirada, e os dados da ficha que ele soube passar. É o cadastro que libera ofertas, preços e condições para o contato novo. Preencha só com o que foi dito; campo não informado fica vazio.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "nome_contato": {
+        "type": "string"
+      },
+      "estabelecimento": {
+        "type": "string",
+        "description": "Nome fantasia ou identificação comercial"
+      },
+      "segmento": {
+        "type": "string",
+        "enum": [
+          "supermercado",
+          "rede_supermercados",
+          "mercearia_mercado",
+          "conveniencia",
+          "distribuidora",
+          "bar_lanchonete",
+          "festa_evento",
+          "outro"
+        ]
+      },
+      "tipo_pessoa": {
+        "type": "string",
+        "enum": [
+          "juridica",
+          "fisica",
+          "nao_informado"
+        ]
+      },
+      "cnpj": {
+        "type": "string",
+        "description": "Só números; vazio se não informou. Nunca peça CPF"
+      },
+      "cidade": {
+        "type": "string"
+      },
+      "uf": {
+        "type": "string",
+        "description": "Sigla, ex.: PR"
+      },
+      "cep": {
+        "type": "string"
+      },
+      "endereco": {
+        "type": "string",
+        "description": "Logradouro, número, bairro e complemento"
+      },
+      "ponto_referencia": {
+        "type": "string"
+      },
+      "email": {
+        "type": "string"
+      },
+      "origem_contato": {
+        "type": "string",
+        "enum": [
+          "anuncio",
+          "instagram",
+          "indicacao",
+          "organico",
+          "outro"
+        ]
+      },
+      "modalidade": {
+        "type": "string",
+        "enum": [
+          "entrega",
+          "retirada",
+          "a definir"
+        ]
+      },
+      "produtos_interesse": {
+        "type": "string"
+      },
+      "volume_estimado": {
+        "type": "string",
+        "description": "Nas palavras do cliente, ex.: umas 30 caixas, 2 paletes; vazio se não disse"
+      },
+      "situacao_elegibilidade": {
+        "type": "string",
+        "enum": [
+          "elegivel",
+          "validar_logistica",
+          "validar_evento",
+          "validar_bar_minimo"
+        ],
+        "description": "validar_logistica se a cidade não está confirmada na base (raio de 100 km); validar_evento para festa ou evento; validar_bar_minimo para bar ou lanchonete"
+      },
+      "documentos_pendentes": {
+        "type": "string",
+        "description": "Vazio se nada"
+      },
+      "resumo_atendimento": {
+        "type": "string",
+        "description": "2 a 3 frases para a equipe"
+      }
+    },
+    "required": [
+      "nome_contato",
+      "estabelecimento",
+      "segmento",
+      "cidade",
+      "uf",
+      "modalidade",
+      "situacao_elegibilidade",
+      "resumo_atendimento"
+    ]
+  },
+  "avancado": {
+    "encerrar_run_apos_executar": true
+  },
+  "exemplos": "nenhum na v1 (com 3 ou mais o classifier passa a filtrar a função)"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "portal-precos-imbativel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Portal com login para a Imbatível atualizar a tabela de preços e o PDF de ofertas do Benjamim; o n8n consulta os preços em /api/dados",
+  "scripts": {
+    "dev": "node dev.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

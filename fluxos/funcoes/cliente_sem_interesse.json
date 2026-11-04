@@ -1,0 +1,7 @@
+{
+  "agente": "Benjamim",
+  "tipo": "Função de saída",
+  "nome": "cliente_sem_interesse",
+  "intencao": "O cliente disse claramente que não quer comprar agora ou não quer seguir a conversa, e já recebeu a despedida cordial. Não usar quando ele só levantou uma objeção (preço, prazo, estoque).",
+  "enviar_mensagem_de_transferencia": "Sim"
+}

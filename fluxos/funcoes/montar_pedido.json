@@ -1,0 +1,98 @@
+{
+  "agente": "Benjamim",
+  "tipo": "Função de fluxo",
+  "nome": "montar_pedido",
+  "descricao": "Chame para gerar a prévia do pedido (cliente cadastrado ou contato novo que já fez o cadastro) quando o cliente terminou de passar os itens, pediu o resumo, ou alterou, incluiu ou tirou um item depois de uma prévia. Mande SEMPRE a lista COMPLETA e atual do pedido, nunca só o item novo. Preço só da base de conhecimento; sem preço na base, deixe 0. Depois de chamar, não escreva nada: o sistema calcula e envia a prévia.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "itens": {
+        "type": "array",
+        "description": "Todos os itens do pedido, já com as alterações",
+        "items": {
+          "type": "object",
+          "properties": {
+            "produto": {
+              "type": "string",
+              "description": "Produto e marca, ex.: Cerveja Skol"
+            },
+            "apresentacao": {
+              "type": "string",
+              "description": "Embalagem e volume, ex.: lata 350 ml"
+            },
+            "unidade_venda": {
+              "type": "string",
+              "enum": [
+                "caixa",
+                "fardo",
+                "unidade",
+                "palete"
+              ]
+            },
+            "quantidade": {
+              "type": "number"
+            },
+            "qtd_por_caixa": {
+              "type": "number",
+              "description": "Unidades por caixa/fardo, da base; 0 se não souber"
+            },
+            "preco_unitario": {
+              "type": "number",
+              "description": "Preço da unidade na tabela vigente; 0 se não está na base"
+            },
+            "preco_caixa": {
+              "type": "number",
+              "description": "Preço da caixa/fardo na tabela vigente; 0 se não está na base"
+            },
+            "condicao": {
+              "type": "string",
+              "description": "Condição da tabela aplicada, ex.: preço de retirada, faixa 10+ caixas; vazio se nenhuma"
+            }
+          },
+          "required": [
+            "produto",
+            "unidade_venda",
+            "quantidade"
+          ]
+        }
+      },
+      "itens_texto": {
+        "type": "string",
+        "description": "Use só se 'itens' não estiver disponível: uma linha por item no formato produto; apresentacao; unidade; quantidade; preco_unitario; preco_caixa; qtd_por_caixa"
+      },
+      "modalidade": {
+        "type": "string",
+        "enum": [
+          "entrega",
+          "retirada",
+          "a definir"
+        ]
+      },
+      "segmento": {
+        "type": "string",
+        "enum": [
+          "supermercado",
+          "rede_supermercados",
+          "mercearia_mercado",
+          "conveniencia",
+          "distribuidora",
+          "bar_lanchonete",
+          "festa_evento",
+          "outro"
+        ]
+      },
+      "observacoes": {
+        "type": "string",
+        "description": "Pedido do cliente sobre o pedido (ex.: entregar pela manhã); vazio se nada"
+      }
+    },
+    "required": [
+      "itens",
+      "modalidade"
+    ]
+  },
+  "avancado": {
+    "encerrar_run_apos_executar": true
+  },
+  "exemplos": "nenhum na v1 (com 3 ou mais o classifier passa a filtrar a função)"
+}

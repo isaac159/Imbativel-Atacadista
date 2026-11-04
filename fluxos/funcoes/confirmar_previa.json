@@ -1,0 +1,31 @@
+{
+  "agente": "Benjamim",
+  "tipo": "Função de fluxo",
+  "nome": "confirmar_previa",
+  "descricao": "Chame somente quando o cliente aprovou de forma expressa a ÚLTIMA prévia enviada (ex.: \"pode mandar\", \"confirmo\", \"tá certo, pode fechar\"). Se ele pediu alteração, chame montar_pedido de novo. Não chame sem prévia enviada.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "confirmacao_cliente": {
+        "type": "string",
+        "description": "As palavras exatas do cliente ao confirmar"
+      },
+      "resumo": {
+        "type": "string",
+        "description": "2 a 3 frases para a equipe: quem é o cliente, o que pediu, sugestões aceitas ou recusadas, dúvidas. Vai junto com a ficha quando o cliente é novo"
+      },
+      "pendencias": {
+        "type": "string",
+        "description": "O que o vendedor precisa confirmar (preço sem base, cobertura de entrega, data); vazio se nada"
+      }
+    },
+    "required": [
+      "confirmacao_cliente",
+      "resumo"
+    ]
+  },
+  "avancado": {
+    "encerrar_run_apos_executar": true
+  },
+  "exemplos": "nenhum na v1 (com 3 ou mais o classifier passa a filtrar a função)"
+}

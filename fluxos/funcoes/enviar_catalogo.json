@@ -1,0 +1,42 @@
+{
+  "agente": "Benjamim",
+  "tipo": "Função de fluxo",
+  "nome": "enviar_catalogo",
+  "descricao": "Chame para enviar a lista de ofertas da semana em PDF. Só chame quando CADASTRO NA CARTEIRA = sim, ou quando SITUAÇÃO DO CADASTRO = cadastrado, dados_coletados ou ficha_enviada (contato novo só depois de registrar_cadastro). Nunca chame para mensagem genérica como \"quero saber mais\" ou \"vi o anúncio\". O sistema escolhe a lista da rota do cliente. Depois de chamar, não escreva nada: o sistema envia o arquivo e a mensagem.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "situacao_cliente": {
+        "type": "string",
+        "enum": [
+          "cliente_cadastrado",
+          "novo_qualificado"
+        ]
+      },
+      "segmento": {
+        "type": "string",
+        "enum": [
+          "supermercado",
+          "rede_supermercados",
+          "mercearia_mercado",
+          "conveniencia",
+          "distribuidora",
+          "bar_lanchonete",
+          "festa_evento",
+          "outro"
+        ]
+      },
+      "cidade": {
+        "type": "string",
+        "description": "Cidade/UF do estabelecimento"
+      }
+    },
+    "required": [
+      "situacao_cliente"
+    ]
+  },
+  "avancado": {
+    "encerrar_run_apos_executar": true
+  },
+  "exemplos": "nenhum na v1 (com 3 ou mais o classifier passa a filtrar a função)"
+}

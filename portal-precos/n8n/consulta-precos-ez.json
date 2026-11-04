@@ -1,0 +1,115 @@
+{
+  "name": "Imbatível · Consulta de preços (EZ)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "72fa7362-d116-4c73-99da-a3f401ac86d1",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "2ba8717a-b87d-480b-90c0-89b0f9f8aabc",
+      "name": "Consulta de preços (EZ)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        -688,
+        -208
+      ],
+      "webhookId": "72fa7362-d116-4c73-99da-a3f401ac86d1"
+    },
+    {
+      "parameters": {
+        "url": "https://SEU-PORTAL.vercel.app/api/dados",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer COLE_AQUI_A_PORTAL_CHAVE_N8N"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "5d1c2b7e-3f4a-4c8e-9b21-6a7f0e9d4c11",
+      "name": "Dados do portal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -464,
+        -208
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Consulta de preços do Benjamim (EZ). Entrada: {\"busca\": \"heineken lata; coca 2l\"}\n// Busca de preços: recebe o texto do cliente e devolve os itens da tabela e das ofertas que batem.\nfunction normTxt(s) {\n  return ' ' + String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()\n    .replace(/(\\d+)[.,](\\d+)\\s*(l|lt|litros?)\\b/g, (m, a, b) => ' ' + Math.round(parseFloat(a + '.' + b) * 1000) + 'ml ')\n    .replace(/(\\d+)\\s*(l|lt|lts|litros?)\\b/g, (m, a) => ' ' + (parseInt(a, 10) * 1000) + 'ml ')\n    .replace(/(\\d+)\\s*ml\\b/g, ' $1ml ')\n    .replace(/(\\d+)\\s*(kg|g)\\b/g, ' $1$2 ')\n    .replace(/[^a-z0-9]+/g, ' ') + ' ';\n}\nconst SINONIMOS = [\n  [/\\blitrao\\b|\\blitr[aã]o\\b/g, ' 1000ml '], [/\\bcoca\\b/g, ' coca cola '], [/\\bcocacola\\b/g, ' coca cola '], [/\\bref(ri|rigerante)?\\b/g, ' refri '],\n  [/\\bcerv(eja)?\\b/g, ' cerveja '], [/\\bln\\b|\\blong\\s*neck\\b|\\blongneck\\b/g, ' long '], [/\\blt\\b|\\blatinha\\b/g, ' lata '],\n  [/\\bgarrafa\\b|\\bgarrafinha\\b/g, ' vd '], [/\\bvidro\\b/g, ' vd '], [/\\bagua\\s*de\\s*coco\\b/g, ' coco '],\n  [/\\bwhisky\\b|\\buisque\\b|\\bwiski\\b/g, ' whisky '], [/\\benergetico\\b/g, ' energetico '], [/\\bcaixas?\\b|\\bcx\\b|\\bcxs\\b/g, ' '],\n  [/\\bfardos?\\b|\\bpacotes?\\b|\\bpcts?\\b|\\bunidades?\\b|\\bund?\\b/g, ' ']\n];\nconst IGNORAR = new Set(['de', 'da', 'do', 'com', 'sem', 'e', 'a', 'o', 'pra', 'para', 'quero', 'preco', 'valor', 'qual', 'quanto', 'ta', 'esta', 'tem', 'cerveja', 'refri', 'pet', 'lata']);\nfunction tokens(s) {\n  let t = normTxt(s);\n  for (const [re, sub] of SINONIMOS) t = t.replace(re, sub);\n  return t.split(' ').filter(Boolean);\n}\nfunction pontua(qTok, itemTok) {\n  const set = new Set(itemTok);\n  let hit = 0, peso = 0, volQ = qTok.filter(t => /^\\d+(ml|kg|g)$/.test(t)), volOk = true;\n  for (const t of qTok) {\n    const w = IGNORAR.has(t) ? 0.3 : (/^\\d/.test(t) ? 1.5 : 1);\n    peso += w;\n    if (set.has(t) || (t.length >= 4 && itemTok.some(x => x.startsWith(t) || (x.length >= 4 && t.startsWith(x))))) hit += w;\n  }\n  if (volQ.length && !volQ.some(v => set.has(v))) volOk = false;\n  if (!peso) return 0;\n  let s = hit / peso;\n  if (!volOk) s *= 0.4; // volume pedido diferente do item\n  return s;\n}\nfunction hojeBR() {\n  const d = new Date(Date.now() - 3 * 3600 * 1000); return d.toISOString().slice(0, 10);\n}\nfunction dataBR(s) { const m = String(s || '').match(/(\\d{2})\\/(\\d{2})\\/(\\d{4})/); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; }\nfunction buscarPrecos(busca, tabela, ofertas, opts = {}) {\n  const limite = opts.limite || 5;\n  const termos = String(busca || '').split(/[;\\n]|,(?!\\d)|\\s+e\\s+(?=\\D)/i).map(s => s.trim()).filter(s => s.length >= 2);\n  const hoje = hojeBR();\n  const ofIni = dataBR(ofertas && ofertas.validade && ofertas.validade.inicio), ofFim = dataBR(ofertas && ofertas.validade && ofertas.validade.fim);\n  const ofertasVigentes = !!ofFim && hoje <= ofFim && (!ofIni || hoje >= ofIni);\n  const tabTok = (tabela.itens || []).map(it => tokens(it.nome + ' ' + it.embalagem));\n  const ofTok = (ofertas.itens || []).map(it => tokens(it.produto + ' ' + it.variacoes));\n  const resultados = [], naoEncontrados = [];\n  for (const termo of termos) {\n    const q = tokens(termo); if (!q.length) continue;\n    const t = (tabela.itens || []).map((it, i) => ({ it, s: pontua(q, tabTok[i]) })).filter(x => x.s >= 0.75).sort((a, b) => b.s - a.s).slice(0, limite);\n    const o = ofertasVigentes ? (ofertas.itens || []).map((it, i) => ({ it, s: pontua(q, ofTok[i]) })).filter(x => x.s >= 0.75).sort((a, b) => b.s - a.s).slice(0, 3) : [];\n    if (!t.length && !o.length) { naoEncontrados.push(termo); continue; }\n    resultados.push({\n      busca: termo,\n      tabela: t.map(x => ({ codigo: x.it.codigo, nome: x.it.nome, unidade: x.it.unidade, embalagem: x.it.embalagem, preco: x.it.preco })),\n      ofertas: o.map(x => ({ produto: x.it.produto, variacoes: x.it.variacoes, preco_oferta: x.it.preco_oferta, faixas: x.it.faixas.map(f => ({ condicao: f.condicao, preco: f.preco })) }))\n    });\n  }\n  return {\n    ok: true,\n    hoje,\n    ofertas_validade: ofertas && ofertas.validade ? `${ofertas.validade.inicio} a ${ofertas.validade.fim}` : '',\n    ofertas_vigentes: ofertasVigentes,\n    tabela_validade: tabela.validade || '',\n    regras: 'Preços por unidade/embalagem descrita. Oferta vale dentro da validade e enquanto durar o estoque, só à vista (dinheiro ou Pix). Faixa \"acima de X\" só vale se a quantidade do cliente passar de X. Se o item não aparecer, é preço a confirmar pelo vendedor.',\n    resultados,\n    nao_encontrados: naoEncontrados\n  };\n}\n\n// Tabela e ofertas vêm do portal (nó \"Dados do portal\"). Quem lê o PDF e a planilha agora é o portal.\nconst dados = $('Dados do portal').first().json || {};\nconst tabela = dados.tabela && dados.tabela.itens ? dados.tabela : { itens: [] };\nconst ofertas = dados.ofertas && dados.ofertas.itens ? dados.ofertas : { itens: [] };\nconst j0 = $('Consulta de preços (EZ)').first().json || {};\nlet body = j0.body || {};\nif (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = { busca: body }; } }\nif (!body.busca && j0.query && j0.query.busca) body = { busca: j0.query.busca };\nconst busca = body.busca || body.produtos || body.itens || body.query || '';\nconst texto = Array.isArray(busca) ? busca.map(b => typeof b === 'string' ? b : (b.produto || b.nome || '')).join('; ') : String(busca);\nconst out = buscarPrecos(texto, tabela, ofertas);\nout.tabela_atualizada_em = dados.tabela_atualizada_em || '';\nout.ofertas_atualizadas_em = dados.ofertas_atualizadas_em || '';\nif (!tabela.itens.length) { out.ok = false; out.erro = 'Preços indisponíveis agora. Diga ao cliente que o vendedor confirma o preço.'; }\nelse if (!texto.trim()) { out.ok = false; out.erro = 'Mande o campo \"busca\" com os produtos separados por ponto e vírgula.'; }\nreturn [{ json: out }];"
+      },
+      "id": "17803bcd-dffc-4031-8728-d6919e791b7b",
+      "name": "Buscar preços",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "e3f3b154-c934-419b-9d5a-356ae03c73df",
+      "name": "Responder ao EZ",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -16,
+        -208
+      ]
+    }
+  ],
+  "connections": {
+    "Consulta de preços (EZ)": {
+      "main": [
+        [
+          {
+            "node": "Dados do portal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados do portal": {
+      "main": [
+        [
+          {
+            "node": "Buscar preços",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar preços": {
+      "main": [
+        [
+          {
+            "node": "Responder ao EZ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

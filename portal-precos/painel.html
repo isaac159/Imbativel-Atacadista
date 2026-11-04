@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Atualizar arquivos · Portal Imbatível</title>
+  <link rel="icon" href="assets/logo-imbativel-quadrado.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body class="oculto" id="corpo">
+  <div class="fundo">
+  <header class="topo">
+    <div class="dentro">
+      <div class="marcas"><img src="assets/logo-imbativel.webp" alt="Imbatível Atacadista"><span class="divisa"></span><img class="matte" src="assets/logo-matte.png" alt="Matte"></div>
+      <nav><a href="/painel" aria-current="page">Atualizar arquivos</a><a href="/resumo">Resumo dos preços</a></nav>
+      <div class="usuario"><span id="quem"></span><button class="botao vidro" id="sair" type="button">Sair</button></div>
+    </div>
+  </header>
+
+  <main class="conteudo">
+    <nav class="abas-pagina"><a href="/painel" aria-current="page">Atualizar arquivos</a><a href="/resumo">Resumo dos preços</a></nav>
+    <div class="cabecalho">
+      <span class="selo simples">Portal de preços</span>
+      <h1 class="titulo">Atualizar <span class="apagado">arquivos</span></h1>
+      <p class="sub">Toda semana, envie o PDF das ofertas. Quando a tabela padrão mudar, envie a planilha Excel no mesmo modelo de sempre. Pode enviar só um dos dois.</p>
+    </div>
+
+    <div class="aviso oculto" id="aviso" role="status"></div>
+    <div class="resultado vidro-cartao oculto" id="resultado" role="status"></div>
+
+    <form id="form-envio">
+      <div class="grade">
+        <article class="bloco vidro-cartao">
+          <div class="cab">
+            <img class="icone-img" src="assets/icone-pdf.png" alt="PDF" width="48" height="48">
+            <h2>Ofertas da semana</h2>
+            <span class="etiqueta destaque">Toda semana</span>
+          </div>
+          <p>O PDF com as ofertas e a validade. O Benjamim só oferece o que estiver dentro da validade.</p>
+          <label class="soltar" data-alvo="pdf">
+            <input type="file" accept=".pdf,application/pdf" id="arq-pdf">
+            <span class="nuvem"><svg viewBox="0 0 64 48" aria-hidden="true"><defs><linearGradient id="g-nuvem" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#8e8e95"/><stop offset=".55" stop-color="#e4e4e7"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs><path d="M16 46a14 14 0 0 1-1.6-27.9A18 18 0 0 1 49 16.3 13 13 0 0 1 50 46z" fill="url(#g-nuvem)"/><path d="M32 37V21M25 27.5l7-7 7 7" fill="none" stroke="#0a0a0a" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <b>Arraste o PDF aqui ou clique para escolher</b>
+            <small>Somente .pdf</small>
+          </label>
+          <div class="arquivo oculto" id="sel-pdf"></div>
+        </article>
+
+        <article class="bloco vidro-cartao">
+          <div class="cab">
+            <img class="icone-img" src="assets/icone-excel.png" alt="Excel" width="48" height="48">
+            <h2>Tabela de preços padrão</h2>
+            <span class="etiqueta">Quando mudar</span>
+          </div>
+          <p>A planilha com todos os produtos e preços fixos. A tabela nova substitui a anterior inteira.</p>
+          <label class="soltar" data-alvo="xls">
+            <input type="file" accept=".xlsx,.xls" id="arq-xls">
+            <span class="nuvem"><svg viewBox="0 0 64 48" aria-hidden="true"><defs><linearGradient id="g-nuvem2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#8e8e95"/><stop offset=".55" stop-color="#e4e4e7"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs><path d="M16 46a14 14 0 0 1-1.6-27.9A18 18 0 0 1 49 16.3 13 13 0 0 1 50 46z" fill="url(#g-nuvem2)"/><path d="M32 37V21M25 27.5l7-7 7 7" fill="none" stroke="#0a0a0a" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <b>Arraste a planilha aqui ou clique para escolher</b>
+            <small>.xlsx ou .xls</small>
+          </label>
+          <div class="arquivo oculto" id="sel-xls"></div>
+        </article>
+      </div>
+
+      <div class="acoes">
+        <button class="botao" type="submit" id="enviar" disabled>Enviar para o Benjamim</button>
+        <span class="nota" id="nota">Escolha pelo menos um arquivo.</span>
+      </div>
+    </form>
+
+    <section class="historico">
+      <h3>Últimos envios da equipe</h3>
+      <ul id="lista" class="vidro-cartao"><li class="vazio">Carregando…</li></ul>
+    </section>
+  </main>
+
+  <footer class="rodape-portal">
+    <div class="dentro"><span>Imbatível Atacadista · Jataizinho/PR</span><span>Portal do Benjamim · Matte</span></div>
+  </footer>
+  </div>
+
+  <script type="module">
+    // Os arquivos não sobem: o navegador lê o PDF (texto) e a planilha (linhas) e manda só isso ao portal.
+    // Assim o PDF de 50 MB das ofertas vira uns 20 KB de texto e não esbarra no limite de 4,5 MB da Vercel.
+    const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/';
+    const SHEETJS = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+    const LIMITE = 150 * 1024 * 1024;
+    const TIPOS = { pdf: /\.pdf$/i, xls: /\.xlsx?$/i };
+    const aviso = document.getElementById('aviso');
+    const resultado = document.getElementById('resultado');
+    const btn = document.getElementById('enviar');
+    const nota = document.getElementById('nota');
+    const entradas = { pdf: document.getElementById('arq-pdf'), xls: document.getElementById('arq-xls') };
+
+    // Sem sessão, volta para o login
+    fetch('/api/sessao').then(async r => {
+      if (!r.ok) return location.replace('/');
+      const d = await r.json();
+      document.getElementById('quem').textContent = d.usuario;
+      document.getElementById('corpo').classList.remove('oculto');
+      carregarHist();
+    }).catch(() => location.replace('/'));
+
+    document.getElementById('sair').addEventListener('click', async () => {
+      await fetch('/api/sessao', { method: 'DELETE' }).catch(() => {});
+      location.replace('/');
+    });
+
+    const kb = b => b > 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    function mostrarAviso(tipo, msg) {
+      aviso.className = 'aviso ' + tipo;
+      aviso.textContent = msg;
+      aviso.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function atualizar() {
+      let qtd = 0, grande = false;
+      for (const [alvo, inp] of Object.entries(entradas)) {
+        const f = inp.files[0];
+        const caixa = document.getElementById('sel-' + alvo);
+        if (!f) { caixa.classList.add('oculto'); continue; }
+        qtd++; if (f.size > LIMITE) grande = true;
+        caixa.innerHTML = '';
+        const info = document.createElement('div'); info.className = 'info';
+        const nome = document.createElement('div'); nome.className = 'nome'; nome.textContent = f.name;
+        const tam = document.createElement('div'); tam.className = 'tam'; tam.textContent = kb(f.size);
+        info.append(nome, tam);
+        const tirar = document.createElement('button');
+        tirar.type = 'button'; tirar.className = 'tirar'; tirar.setAttribute('aria-label', 'Tirar arquivo'); tirar.textContent = '✕';
+        tirar.onclick = () => { inp.value = ''; atualizar(); };
+        caixa.append(info, tirar);
+        caixa.classList.remove('oculto');
+      }
+      btn.disabled = qtd === 0 || grande;
+      nota.textContent = qtd === 0 ? 'Escolha pelo menos um arquivo.'
+        : grande ? 'Arquivo grande demais (mais de 150 MB). Confira se é o arquivo certo.'
+        : qtd === 2 ? 'Os dois arquivos vão juntos.' : 'Pronto para enviar.';
+    }
+
+    function aceitar(alvo, arquivo) {
+      if (!TIPOS[alvo].test(arquivo.name)) {
+        mostrarAviso('erro', alvo === 'pdf' ? 'Esse campo aceita só arquivo PDF.' : 'Esse campo aceita só planilha Excel (.xlsx ou .xls).');
+        return false;
+      }
+      return true;
+    }
+
+    for (const [alvo, inp] of Object.entries(entradas)) {
+      inp.addEventListener('change', () => {
+        if (inp.files[0] && !aceitar(alvo, inp.files[0])) inp.value = '';
+        atualizar();
+      });
+      const zona = inp.closest('.soltar');
+      ['dragenter', 'dragover'].forEach(ev => zona.addEventListener(ev, e => { e.preventDefault(); zona.classList.add('arrastando'); }));
+      ['dragleave', 'drop'].forEach(ev => zona.addEventListener(ev, () => zona.classList.remove('arrastando')));
+      zona.addEventListener('drop', e => {
+        e.preventDefault();
+        const f = e.dataTransfer.files[0];
+        if (!f || !aceitar(alvo, f)) return;
+        const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files;
+        atualizar();
+      });
+    }
+
+    // ---- Leitura no navegador ----
+    async function textoDoPdf(arquivo) {
+      const pdfjs = await import(PDFJS + 'pdf.min.mjs');
+      pdfjs.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.mjs';
+      const doc = await pdfjs.getDocument({ data: new Uint8Array(await arquivo.arrayBuffer()), isEvalSupported: false }).promise;
+      const paginas = [];
+      for (let p = 1; p <= doc.numPages; p++) {
+        const pg = await doc.getPage(p);
+        const tc = await pg.getTextContent();
+        paginas.push(tc.items.map(it => it.str + (it.hasEOL ? '\n' : ' ')).join(''));
+        pg.cleanup();
+      }
+      await doc.destroy();
+      return paginas.join('\n');
+    }
+
+    function carregarScript(src) {
+      return new Promise((ok, falha) => {
+        if (window.XLSX) return ok();
+        const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => falha(Object.assign(new Error('Não consegui abrir o leitor de planilhas. Confira a internet e tente de novo.'), { nosso: true }));
+        document.head.append(s);
+      });
+    }
+
+    async function linhasDaPlanilha(arquivo) {
+      await carregarScript(SHEETJS);
+      const wb = XLSX.read(await arquivo.arrayBuffer(), { type: 'array' });
+      const aba = wb.Sheets[wb.SheetNames[0]];
+      return XLSX.utils.sheet_to_json(aba, { header: 1, defval: '', raw: true });
+    }
+
+    // ---- Histórico da equipe (vem do portal) ----
+    async function carregarHist() {
+      const lista = document.getElementById('lista');
+      try {
+        const r = await fetch('/api/resumo');
+        if (!r.ok) throw new Error();
+        const { historico } = await r.json();
+        lista.innerHTML = '';
+        if (!historico.length) { lista.innerHTML = '<li class="vazio">Nenhum envio ainda.</li>'; return; }
+        for (const it of historico.slice(0, 8)) {
+          const li = document.createElement('li');
+          const p = document.createElement('span'); p.className = 'ponto';
+          const t = document.createElement('span'); t.textContent = it.arquivos.join(' + ') + ' · ' + it.usuario;
+          const q = document.createElement('span'); q.className = 'quando'; q.textContent = it.em.slice(8, 10) + '/' + it.em.slice(5, 7) + ' ' + it.em.slice(11);
+          li.append(p, t, q); lista.append(li);
+        }
+      } catch (e) { lista.innerHTML = '<li class="vazio">Não consegui carregar os envios agora.</li>'; }
+    }
+
+    function mostrarResultado(reg) {
+      const linhas = [];
+      if (reg.ofertas) {
+        const o = reg.ofertas, v = o.validade ? ` · validade ${esc(o.validade.inicio)} a ${esc(o.validade.fim)}` : '';
+        linhas.push(`<li><b>Ofertas:</b> ${o.total} ofertas${v} · ${o.mudaram.length} preços mudaram, ${o.novos.length} novas, ${o.sairam.length} saíram</li>`);
+      }
+      if (reg.tabela) {
+        const t = reg.tabela;
+        linhas.push(`<li><b>Tabela:</b> ${t.total} produtos · ${t.subiram} subiram, ${t.baixaram} baixaram, ${t.novos.length} novos, ${t.sairam.length} saíram</li>`);
+      }
+      for (const a of reg.avisos || []) linhas.push(`<li class="alerta">${esc(a)}</li>`);
+      resultado.innerHTML = `<h3>Pronto! O Benjamim já usa os preços novos.</h3><ul>${linhas.join('')}</ul><a href="/resumo">Ver o que mudou</a>`;
+      resultado.classList.remove('oculto');
+      resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    document.getElementById('form-envio').addEventListener('submit', async e => {
+      e.preventDefault();
+      const pdf = entradas.pdf.files[0], xls = entradas.xls.files[0];
+      if (!pdf && !xls) return;
+      aviso.className = 'aviso oculto'; resultado.classList.add('oculto');
+      btn.disabled = true;
+      const passo = t => { btn.innerHTML = '<span class="girando"></span>' + t; };
+      try {
+        const corpo = {};
+        if (pdf) { passo('Lendo o PDF…'); corpo.ofertas = { arquivo: pdf.name, texto: await textoDoPdf(pdf) }; }
+        if (xls) { passo('Lendo a planilha…'); corpo.tabela = { arquivo: xls.name, linhas: await linhasDaPlanilha(xls) }; }
+        passo('Enviando…');
+        const r = await fetch('/api/atualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
+        const d = await r.json().catch(() => ({}));
+        if (r.status === 401) { location.replace('/'); return; }
+        if (!r.ok) throw Object.assign(new Error(d.erro || 'O envio não deu certo. Tente de novo.'), { nosso: true });
+        mostrarResultado(d.registro);
+        Object.values(entradas).forEach(i => i.value = '');
+        carregarHist();
+      } catch (err) {
+        console.error(err);
+        mostrarAviso('erro', err.nosso ? err.message : 'Não consegui ler o arquivo. Confira se é o arquivo certo e tente de novo.');
+      } finally {
+        btn.textContent = 'Enviar para o Benjamim';
+        atualizar();
+      }
+    });
+  </script>
+</body>
+</html>

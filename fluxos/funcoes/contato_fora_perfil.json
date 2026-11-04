@@ -1,0 +1,7 @@
+{
+  "agente": "Benjamim",
+  "tipo": "Função de saída",
+  "nome": "contato_fora_perfil",
+  "intencao": "O contato é consumidor final comprando para uso próprio (não tem comércio e não é festa ou evento com retirada), já ouviu que a Imbatível atende só comerciantes e recebeu a despedida.",
+  "enviar_mensagem_de_transferencia": "Sim"
+}

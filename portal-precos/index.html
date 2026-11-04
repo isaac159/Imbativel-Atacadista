@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Entrar · Portal de preços Imbatível</title>
+  <link rel="icon" href="assets/logo-imbativel-quadrado.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+  <div class="fundo">
+    <main class="login">
+      <section class="heroi">
+        <h1 class="oculto">Portal de preços Imbatível Atacadista</h1>
+        <img class="logo" src="assets/logo-imbativel.webp" alt="Imbatível Atacadista">
+      </section>
+
+      <form class="cartao vidro-cartao" id="form-login" novalidate>
+        <h2>Entrar no portal</h2>
+        <p class="sub">Use o usuário e a senha que a Matte enviou para a equipe da Imbatível.</p>
+
+        <div class="aviso erro oculto" id="erro" role="alert"></div>
+
+        <div class="campo">
+          <label for="usuario">Usuário</label>
+          <div class="entrada">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <input id="usuario" name="usuario" placeholder="seu usuário" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <div class="entrada">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input id="senha" name="senha" type="password" placeholder="••••••••" autocomplete="current-password" required>
+            <button type="button" class="ver-senha" id="ver-senha" aria-label="Mostrar senha">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <button class="botao largo" type="submit" id="entrar">Entrar</button>
+        <p class="ajuda">Esqueceu a senha? Fale com a Matte pelo WhatsApp.</p>
+        <div class="feito-por"><span>Tecnologia</span><img src="assets/logo-matte.png" alt="Matte" width="57" height="16"></div>
+      </form>
+    </main>
+  </div>
+
+  <script>
+    const form = document.getElementById('form-login');
+    const erro = document.getElementById('erro');
+    const botao = document.getElementById('entrar');
+    const senha = document.getElementById('senha');
+    const ROTULO = 'Entrar';
+
+    // Já logado? vai direto para o painel
+    fetch('/api/sessao').then(r => { if (r.ok) location.replace('/painel'); }).catch(() => {});
+
+    document.getElementById('ver-senha').addEventListener('click', e => {
+      const mostrar = senha.type === 'password';
+      senha.type = mostrar ? 'text' : 'password';
+      e.currentTarget.setAttribute('aria-label', mostrar ? 'Esconder senha' : 'Mostrar senha');
+    });
+
+    function mostrarErro(msg) { erro.textContent = msg; erro.classList.remove('oculto'); }
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      erro.classList.add('oculto');
+      const usuario = form.usuario.value.trim();
+      if (!usuario || !senha.value) return mostrarErro('Preencha o usuário e a senha.');
+      botao.disabled = true;
+      botao.innerHTML = '<span class="girando"></span>Entrando…';
+      try {
+        const r = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario, senha: senha.value })
+        });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.erro || 'Não foi possível entrar.');
+        location.replace('/painel');
+      } catch (err) {
+        mostrarErro(err.message);
+        senha.select();
+      } finally {
+        botao.disabled = false;
+        botao.textContent = ROTULO;
+      }
+    });
+  </script>
+</body>
+</html>
