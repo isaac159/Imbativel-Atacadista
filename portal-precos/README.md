@@ -37,8 +37,8 @@ Sem banco configurado, os preços ficam na pasta `.dados/`. Apague essa pasta pa
 
 ## Publicar na Vercel
 1. Suba esta pasta num repositório Git (ou use `vercel` pela linha de comando dentro dela).
-2. Vercel → Add New Project → importar → Framework: **Other**. Não precisa de build nem de `npm install`.
-3. Vercel → Storage → **Upstash for Redis** (plano grátis) → Connect ao projeto. Isso cria `KV_REST_API_URL` e `KV_REST_API_TOKEN`.
+2. Vercel → Add New Project → importar → Framework: **Other**. Não precisa de build (a Vercel instala sozinha o pacote `redis`).
+3. Vercel → Storage → **Redis** ou **Upstash for Redis** (plano grátis) → Connect ao projeto. O Redis cria `REDIS_URL`; o Upstash cria `KV_REST_API_URL` e `KV_REST_API_TOKEN`. O portal aceita os dois.
 4. Settings → Environment Variables (Production):
    - `PORTAL_USUARIOS`: `imbativel:SENHA-FORTE`. Para mais de um usuário, separe com `;`.
    - `PORTAL_SEGREDO` e `PORTAL_CHAVE_N8N`: gere cada um com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
