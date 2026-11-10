@@ -2,31 +2,67 @@
 // e comparação com a versão anterior, para o resumo mostrar o que mudou.
 // O navegador extrai o texto do PDF e as linhas da planilha; aqui o texto vira {validade, itens}.
 
-// PDF semanal de ofertas → {validade: {inicio, fim}, itens}
-// Funciona com o texto em linhas ou tudo numa linha só (ordem do PDF: nome, variações, OFERTA, preço, faixas).
+// PDF de ofertas → {validade: {inicio, fim}, itens}
+// A Imbatível já usou dois modelos de PDF, e o leitor entende os dois:
+//   clássico ("Ofertas fecha mês"):  NOME [variações] OFERTA R$ x [ACIMA DE n UN. R$ y ...]
+//   em volume ("Pré Black Friday"):  NOME [variações] [ACIMA DE n UNIDADES R$ y ...] POR UNIDADE R$ x
+//                                     ou NOME [variações] POR APENAS R$ x DE R$ antigo
+// Roda os dois e fica com o que achou mais ofertas.
+// Funciona com o texto em linhas ou tudo numa linha só.
 function lerOfertas(texto) {
   const t = String(texto || '').replace(/ /g, ' ');
-  const val = t.match(/(\d{2}\/\d{2}\/\d{4})\s*a\s*(\d{2}\/\d{2}\/\d{4})/);
   const tokens = t.split(/\s+/).filter(Boolean);
-  const num = s => parseFloat(String(s).replace(/\./g, '').replace(',', '.'));
-  const temMinuscula = w => /[a-zà-ÿ]/.test(w);
-  const semLetra = w => !/[A-Za-zÀ-ÿ]/.test(w);
-  const UNID = /^(ML|L|LT|LTS|LITRO|LITROS|KG|G|UN|UND)$/;
+  const classico = lerOfertasClassico(tokens), volume = lerOfertasVolume(tokens);
+  const itens = volume.length > classico.length ? volume : classico;
+  return { validade: lerValidade(t), itens };
+}
+
+const num = s => parseFloat(String(s).replace(/\./g, '').replace(',', '.'));
+const temMinuscula = w => /[a-zà-ÿ]/.test(w);
+const semLetra = w => !/[A-Za-zÀ-ÿ]/.test(w);
+const UNID = /^(ML|L|LT|LTS|LITRO|LITROS|KG|G|UN|UND)$/;
+
+// "23/10/2026 a 30/10/2026" ou "VÁLIDA DE 10 A 14/11/2026" (também "DE 28/11 A 02/12/2026")
+function lerValidade(t) {
+  const a = t.match(/(\d{2}\/\d{2}\/\d{4})\s*a\s*(\d{2}\/\d{2}\/\d{4})/i);
+  if (a) return { inicio: a[1], fim: a[2] };
+  const b = t.match(/V[ÁA]LID[AO]S?\s+(?:DE\s+)?(\d{1,2})(?:\/(\d{1,2}))?(?:\/(\d{4}))?\s+(?:A|AT[ÉE])\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/i);
+  if (!b) return null;
+  const d2 = s => String(s).padStart(2, '0');
+  const mesFim = +b[5], anoFim = +b[6];
+  const mesIni = b[2] ? +b[2] : mesFim;
+  const anoIni = b[3] ? +b[3] : (mesIni > mesFim ? anoFim - 1 : anoFim);
+  return { inicio: `${d2(b[1])}/${d2(mesIni)}/${anoIni}`, fim: `${d2(b[4])}/${d2(mesFim)}/${anoFim}` };
+}
+
+// Nome e variações ficam antes do preço: [lixo de página] NOME (maiúsculas) [variações com minúsculas]
+function nomeEVariacoes(seg) {
+  let k = seg.length - 1;
+  // variações: tokens com minúscula, aceitando números/pontuação no meio ("Pack com 18 unidades")
+  // e palavras em maiúsculas no meio da frase ("Job, CLT e maçã", "Mango N’ Cherry")
+  const varTok = [];
+  const noMeio = j => varTok.length && j > 0 && temMinuscula(seg[j - 1]) && !/[.:]$/.test(seg[j - 1]);
+  while (k >= 0 && (temMinuscula(seg[k]) || (semLetra(seg[k]) && varTok.length && k > 0 && (temMinuscula(seg[k - 1]) || UNID.test(seg[k - 1]))) || noMeio(k))) { varTok.unshift(seg[k]); k--; }
+  // nome: tokens sem minúscula até achar texto de cabeçalho/rodapé
+  const nomeTok = [];
+  while (k >= 0 && !temMinuscula(seg[k])) { nomeTok.unshift(seg[k]); k--; }
+  // tira restos de rodapé do começo do nome ("01 / 34")
+  while (nomeTok.length && /^[\d/]+$/.test(nomeTok[0])) nomeTok.shift();
+  return { nome: nomeTok.join(' ').trim(), variacoes: varTok.join(' ').trim() };
+}
+
+function faixa(cond, preco) {
+  return { condicao: 'acima de ' + cond.join(' ').toLowerCase(), minimo: parseInt(cond[0], 10) || null,
+    unidade: cond.slice(1).join(' ').toLowerCase().replace(/\.$/, ''), preco };
+}
+
+// Modelo clássico: o preço vem depois da palavra OFERTA
+function lerOfertasClassico(tokens) {
   const itens = [];
   let i = 0, inicioSeg = 0;
   while (i < tokens.length) {
     if (tokens[i] !== 'OFERTA') { i++; continue; }
-    // segmento antes do OFERTA: [lixo de página] NOME (maiúsculas) [variações com minúsculas]
-    const seg = tokens.slice(inicioSeg, i);
-    let k = seg.length - 1;
-    // variações: tokens com minúscula, aceitando números/pontuação no meio ("Pack com 18 unidades")
-    const varTok = [];
-    while (k >= 0 && (temMinuscula(seg[k]) || (semLetra(seg[k]) && varTok.length && k > 0 && (temMinuscula(seg[k - 1]) || UNID.test(seg[k - 1]))))) { varTok.unshift(seg[k]); k--; }
-    // nome: tokens sem minúscula até achar texto de cabeçalho/rodapé
-    const nomeTok = [];
-    while (k >= 0 && !temMinuscula(seg[k])) { nomeTok.unshift(seg[k]); k--; }
-    // tira restos de rodapé do começo do nome ("01 / 34")
-    while (nomeTok.length && /^[\d/]+$/.test(nomeTok[0])) nomeTok.shift();
+    const { nome, variacoes } = nomeEVariacoes(tokens.slice(inicioSeg, i));
     i++;
     if (tokens[i] !== 'R$') { inicioSeg = i; continue; }
     const base = num(tokens[i + 1]); i += 2;
@@ -35,15 +71,48 @@ function lerOfertas(texto) {
       const cond = []; let j = i + 2;
       while (j < tokens.length && tokens[j] !== 'R$') { cond.push(tokens[j]); j++; }
       if (tokens[j] !== 'R$') break;
-      faixas.push({ condicao: 'acima de ' + cond.join(' ').toLowerCase(), minimo: parseInt(cond[0], 10) || null,
-        unidade: cond.slice(1).join(' ').toLowerCase().replace(/\.$/, ''), preco: num(tokens[j + 1]) });
+      faixas.push(faixa(cond, num(tokens[j + 1])));
       i = j + 2;
     }
     inicioSeg = i;
-    const nome = nomeTok.join(' ').trim();
-    if (nome && !isNaN(base)) itens.push({ produto: nome, variacoes: varTok.join(' ').trim(), preco_oferta: base, faixas });
+    if (nome && !isNaN(base)) itens.push({ produto: nome, variacoes, preco_oferta: base, faixas });
   }
-  return { validade: val ? { inicio: val[1], fim: val[2] } : null, itens };
+  return itens;
+}
+
+// Modelo em volume: cada produto é um bloco de preços (ACIMA DE…, POR UNIDADE…, POR APENAS…, DE…), cada um seguido de R$ valor
+function lerOfertasVolume(tokens) {
+  // devolve onde está o "R$" se o token i começa um item de preço; senão -1
+  const rs = (i, ate) => { for (let j = i + 1; j <= i + ate && j < tokens.length; j++) if (tokens[j] === 'R$') return j; return -1; };
+  const inicioPreco = i => {
+    if (tokens[i] === 'ACIMA' && tokens[i + 1] === 'DE') return rs(i + 1, 5);
+    if (tokens[i] === 'POR') return rs(i, 3);
+    if (tokens[i] === 'DE' && tokens[i + 1] === 'R$') return i + 1;
+    return -1;
+  };
+  const itens = [];
+  let i = 0, inicioSeg = 0;
+  while (i < tokens.length) {
+    if (inicioPreco(i) < 0) { i++; continue; }
+    const { nome, variacoes } = nomeEVariacoes(tokens.slice(inicioSeg, i));
+    let base = null, de = null, j;
+    const faixas = [];
+    while ((j = inicioPreco(i)) >= 0) {
+      const valor = num(tokens[j + 1]);
+      if (tokens[i] === 'ACIMA') faixas.push(faixa(tokens.slice(i + 2, j), valor));
+      else if (tokens[i] === 'DE') de = valor;
+      else base = valor; // POR UNIDADE / POR PACOTE / POR APENAS
+      i = j + 2;
+    }
+    inicioSeg = i;
+    faixas.sort((a, b) => (a.minimo || 0) - (b.minimo || 0));
+    if (base == null && faixas.length) base = faixas[0].preco;
+    if (!nome || base == null || isNaN(base)) continue;
+    const item = { produto: nome, variacoes, preco_oferta: base, faixas };
+    if (de != null && !isNaN(de)) item.preco_de = de;
+    itens.push(item);
+  }
+  return itens;
 }
 
 // Linhas da planilha fixa (arrays de células) → {validade, itens}
