@@ -80,4 +80,11 @@ async function registrarEnvio(item) {
   await gravar('historico', [item, ...hist].slice(0, 30));
 }
 
-module.exports = { lerPrecos, gravarPrecos: v => gravar('precos', v), lerHistorico, registrarEnvio };
+// Carteira de clientes: { vendedores: { '13': { clientes, total, data_lista, arquivo, atualizada_em, usuario, problemas, mudancas } } }
+// Não tem dado inicial no código (são dados pessoais dos clientes): vale a partir do primeiro envio de cada vendedor.
+async function lerCarteira() {
+  return (await ler('carteira')) || { vendedores: {} };
+}
+
+module.exports = { lerPrecos, gravarPrecos: v => gravar('precos', v), lerHistorico, registrarEnvio,
+  lerCarteira, gravarCarteira: v => gravar('carteira', v) };

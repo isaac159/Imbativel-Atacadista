@@ -13,12 +13,16 @@ EZ (Benjamim) ──POST busca──▶ n8n "Consulta de preços (EZ)" ──GET
 index.html        login (logo Imbatível + "Tecnologia Matte")
 painel.html       envio dos dois arquivos + últimos envios da equipe
 resumo.html       números, o que mudou no último envio e a lista de preços valendo
+clientes.html     um quadro por vendedor para enviar a LISTA DE CLIENTES (PDF) de cada um
 assets/           estilo.css, logos e ícones
 api/login.js      POST: confere usuário e senha e grava o cookie de sessão (12 h)
 api/sessao.js     GET: quem está logado · DELETE: sair
 api/atualizar.js  POST (sessão): recebe texto do PDF / linhas do Excel, lê, compara e salva
 api/resumo.js     GET (sessão): preços atuais + histórico de envios
 api/dados.js      GET (chave do n8n): tabela e ofertas para a busca do Benjamim
+api/clientes.js   GET/POST (sessão): resumo das carteiras / troca a lista de um vendedor
+api/carteira.js   POST (mesma chave do n8n): consulta do fluxo da EZ pelo telefone do contato (nó 10)
+api/_carteira.js  leitura da LISTA DE CLIENTES por colunas, consulta (mesma lógica do antigo nó 10) e comparação
 api/_leitura.js   leitura do PDF e da planilha (mesma regra dos nós do n8n) e comparação
 api/_armazem.js   Upstash Redis na Vercel, pasta .dados/ no computador
 api/_inicial.json dados de partida (os mesmos que estavam no n8n)
@@ -51,6 +55,25 @@ Sem banco configurado, os preços ficam na pasta `.dados/`. Apague essa pasta pa
 4. Teste: envie um arquivo pelo portal e pergunte um preço ao Benjamim. Depois **desative o fluxo do formulário antigo** ("Atualizar preços do Benjamim"), que deixou de ser usado.
 
 Se o portal não responder, o nó tenta 3 vezes e a busca devolve `ok: false` com a orientação "vendedor confirma o preço", e o Benjamim não inventa valor.
+
+## Carteira de clientes (aba "Clientes dos vendedores")
+Cada vendedor tem um quadro. O PDF "LISTA DE CLIENTES" do sistema da Imbatível é lido no navegador (posição de cada palavra) e o servidor separa as colunas (`api/_carteira.js`).
+- **Confere o vendedor**: se a lista enviada for de outro vendedor (coluna VEN), o portal recusa e diz de quem é.
+- **Confere se leu tudo**: compara com o rodapé "N CLIENTES LISTADOS".
+- **Telefone**: guarda já no formato do WhatsApp. Completa o DDD 43 quando falta (8 dígitos, ou 9 começando com 9). Os que não dá para usar aparecem no quadro como "clientes que o Benjamim não reconhece", para a equipe corrigir no sistema.
+- Não guarda CPF/CNPJ, inscrição nem aniversário. Não há dado de cliente no código: a carteira vale a partir do primeiro envio de cada vendedor.
+- **Vendedor novo**: incluir em `VENDEDORES` (`api/_carteira.js`) e criar o caminho dele nos nós 15b e V5 do fluxo da EZ.
+
+### Ligar a EZ à carteira (troca o nó 10 do fluxo)
+Antes de trocar, envie as 5 listas pelo portal em produção. Sem nenhuma lista, `/api/carteira` responde erro e o fluxo cai em "carteira indisponível".
+1. Apague o nó **10 · Consultar carteira (planilhas dos vendedores)** (o Executar código com a base embutida).
+2. No lugar, crie uma **Requisição API** "10 · Consultar carteira (portal)":
+   - POST `https://SEU-PORTAL.vercel.app/api/carteira`
+   - Cabeçalhos: `Content-Type: application/json` e `Authorization: Bearer <PORTAL_CHAVE_N8N>`
+   - Corpo: `{"teste_telefone": "{{flow.teste_telefone}}", "telefone_consulta": "{{flow.telefone_consulta}}", "identifier": "{{user.identifier}}", "codigo_cliente": "{{user.codigo_cliente}}", "pedido_vendedor_codigo": "{{user.pedido_vendedor_codigo}}"}`
+3. Depois dela, um **Executar código** "10b · Ler resposta da carteira" com o código de `fluxos/scripts/ler_carteira_portal.js`.
+4. Ligações: entradas que iam para o 10 (9 · Veio de anúncio? e 9b · Salvar última origem) → 10. Saída de sucesso do 10 → 10b. Saída de erro do 10 → 16 · Carteira indisponível. Sucesso do 10b → 13 · Salvar cadastro da carteira. Erro do 10b → 16.
+5. O resto do fluxo (13, 14a, 15, 15b, V5…) não muda: o portal devolve os mesmos campos `cadastro_encontrado` e `cad_*`.
 
 ## Limites
 - O PDF precisa estar no modelo de sempre, com o texto selecionável. PDF escaneado como imagem não tem texto para ler, e o portal avisa "Não achei ofertas".

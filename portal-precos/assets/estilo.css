@@ -312,3 +312,24 @@ button { font: inherit; }
 .filtros { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .filtros .busca { width: 260px; }
 @media (max-width: 600px) { .filtros, .filtros .busca { width: 100%; } }
+
+/* ---------- Clientes dos vendedores (20/11) ---------- */
+.abas-pagina a { font-size: 13px; padding: 9px 6px; }
+.vendedores { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.vendedor { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.vendedor .cab { display: flex; align-items: center; gap: 12px; }
+.vendedor .sigla { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; flex: none; font-weight: 700; font-size: 15px; color: #000; background: linear-gradient(180deg, #fff, #cfcfd3); }
+.vendedor h2 { font-family: var(--fonte-titulo); font-weight: 400; font-size: 21px; line-height: 1.2; }
+.vendedor .cod { color: var(--texto3); font-size: 12px; }
+.vendedor .info { font-size: 13.5px; color: var(--texto2); display: grid; gap: 2px; }
+.vendedor .info b { color: var(--texto); font-size: 22px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.vendedor .info .alerta { color: var(--erro); }
+.vendedor .soltar { min-height: 96px; padding: 14px; }
+.vendedor .soltar .nuvem { width: 48px; }
+.vendedor .estado { font-size: 13px; color: var(--texto2); }
+.vendedor .estado.erro { color: var(--erro); }
+.vendedor .estado.ok { color: var(--texto); }
+.vendedor details { font-size: 13px; color: var(--texto2); border-top: 1px solid var(--borda); padding-top: 10px; }
+.vendedor summary { cursor: pointer; color: var(--texto); font-weight: 500; }
+.vendedor details ul { list-style: none; margin-top: 8px; display: grid; gap: 4px; max-height: 220px; overflow: auto; }
+.vendedor details li span { color: var(--texto3); }

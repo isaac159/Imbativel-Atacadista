@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Clientes dos vendedores · Portal Imbatível</title>
+  <link rel="icon" href="assets/logo-imbativel-quadrado.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body class="oculto" id="corpo">
+  <div class="fundo">
+  <header class="topo">
+    <div class="dentro">
+      <div class="marcas"><img src="assets/logo-imbativel.webp" alt="Imbatível Atacadista"><span class="divisa"></span><img class="matte" src="assets/logo-matte.png" alt="Matte"></div>
+      <nav><a href="/painel">Atualizar arquivos</a><a href="/resumo">Resumo dos preços</a><a href="/clientes" aria-current="page">Clientes dos vendedores</a></nav>
+      <div class="usuario"><span id="quem"></span><button class="botao vidro" id="sair" type="button">Sair</button></div>
+    </div>
+  </header>
+
+  <main class="conteudo">
+    <nav class="abas-pagina"><a href="/painel">Atualizar arquivos</a><a href="/resumo">Resumo dos preços</a><a href="/clientes" aria-current="page">Clientes dos vendedores</a></nav>
+    <div class="cabecalho">
+      <span class="selo simples">Carteira de cada vendedor</span>
+      <h1 class="titulo">Clientes dos <span class="apagado">vendedores</span></h1>
+      <p class="sub">Envie a LISTA DE CLIENTES (PDF do sistema) no quadro de cada vendedor. A lista nova substitui a anterior daquele vendedor, e o Benjamim passa a reconhecer os clientes pelo telefone na hora.</p>
+    </div>
+
+    <div class="aviso oculto" id="aviso" role="status"></div>
+    <div class="vendedores" id="vendedores"></div>
+  </main>
+
+  <footer class="rodape-portal">
+    <div class="dentro"><span>Imbatível Atacadista · Jataizinho/PR</span><span>Portal do Benjamim · Matte</span></div>
+  </footer>
+  </div>
+
+  <script type="module">
+    // O PDF não sobe: o navegador lê as linhas com a posição de cada palavra e manda só isso (uns 250 KB).
+    const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/';
+    const NUVEM = '<span class="nuvem"><svg viewBox="0 0 64 48" aria-hidden="true"><path d="M16 46a14 14 0 0 1-1.6-27.9A18 18 0 0 1 49 16.3 13 13 0 0 1 50 46z" fill="url(#g-nuvem-c)"/><path d="M32 37V21M25 27.5l7-7 7 7" fill="none" stroke="#0a0a0a" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const inteiro = v => Number(v || 0).toLocaleString('pt-BR');
+    const quando = s => /^\d{4}-\d{2}-\d{2} /.test(s || '') ? `${s.slice(8, 10)}/${s.slice(5, 7)} às ${s.slice(11, 16)}` : (s || '');
+    const plural = (n, um, varios) => `${inteiro(n)} ${n === 1 ? um : varios}`;
+
+    fetch('/api/sessao').then(async r => {
+      if (!r.ok) return location.replace('/');
+      $('quem').textContent = (await r.json()).usuario;
+      $('corpo').classList.remove('oculto');
+      carregar();
+    }).catch(() => location.replace('/'));
+
+    $('sair').addEventListener('click', async () => {
+      await fetch('/api/sessao', { method: 'DELETE' }).catch(() => {});
+      location.replace('/');
+    });
+
+    async function carregar() {
+      try {
+        const r = await fetch('/api/clientes');
+        if (r.status === 401) return location.replace('/');
+        if (!r.ok) throw new Error();
+        const { vendedores } = await r.json();
+        $('vendedores').innerHTML = '<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="g-nuvem-c" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#8e8e95"/><stop offset=".55" stop-color="#e4e4e7"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs></svg>';
+        for (const v of vendedores) $('vendedores').append(cartao(v));
+      } catch (e) {
+        $('aviso').className = 'aviso erro';
+        $('aviso').textContent = 'Não consegui carregar as carteiras agora. Atualize a página em alguns minutos.';
+      }
+    }
+
+    function detalhes(v) {
+      const partes = [];
+      const m = v.mudancas;
+      if (m && (m.n_novos || m.n_sairam || m.n_mudaram)) {
+        const li = [
+          ...m.novos.map(c => `<li>+ ${esc(c.codigo)} ${esc(c.razao)} <span>novo · ${esc(c.cidade)}</span></li>`),
+          ...m.sairam.map(c => `<li>− ${esc(c.codigo)} ${esc(c.razao)} <span>saiu</span></li>`),
+          ...m.mudaram.map(c => `<li>• ${esc(c.codigo)} ${esc(c.razao)} <span>${esc(c.mudancas)}</span></li>`)
+        ];
+        partes.push(`<details><summary>O que mudou no último envio: ${plural(m.n_novos, 'novo', 'novos')}, ${plural(m.n_sairam, 'saiu', 'saíram')}, ${plural(m.n_mudaram, 'mudou', 'mudaram')}</summary><ul>${li.join('')}</ul></details>`);
+      }
+      if (v.n_problemas) {
+        const li = v.problemas.map(p => `<li>${esc(p.codigo)} ${esc(p.razao)} <span>${p.motivo === 'sem telefone' ? 'sem telefone' : 'telefone incompleto: ' + esc(p.telefone)}</span></li>`);
+        partes.push(`<details><summary>${plural(v.n_problemas, 'cliente', 'clientes')} que o Benjamim não reconhece pelo WhatsApp</summary><p style="margin-top:6px">Sem telefone ou com telefone incompleto no cadastro. Corrija no sistema e envie a lista de novo.</p><ul>${li.join('')}</ul></details>`);
+      }
+      return partes.join('');
+    }
+
+    function cartao(v) {
+      const el = document.createElement('article');
+      el.className = 'vendedor vidro-cartao';
+      const info = v.enviada
+        ? `<b>${inteiro(v.total)}</b> clientes${v.data_lista ? ` · lista de ${esc(v.data_lista)}` : ''}<br>Atualizada ${esc(quando(v.atualizada_em))} por ${esc(v.usuario)}${(v.avisos || []).map(a => `<br><span class="alerta">${esc(a)}</span>`).join('')}`
+        : '<span class="alerta">Lista ainda não enviada. O Benjamim não reconhece os clientes deste vendedor.</span>';
+      el.innerHTML = `
+        <div class="cab"><span class="sigla">${esc(v.codigo)}</span><div><h2>${esc(v.nome)}</h2><div class="cod">Vendedor ${esc(v.codigo)}</div></div></div>
+        <div class="info">${info}</div>
+        <label class="soltar">
+          <input type="file" accept=".pdf,application/pdf">
+          ${NUVEM}
+          <b>Enviar lista do ${esc(v.nome)}</b>
+          <small>LISTA DE CLIENTES em PDF</small>
+        </label>
+        <div class="estado" role="status"></div>
+        ${detalhes(v)}`;
+      const inp = el.querySelector('input'), zona = el.querySelector('.soltar'), estado = el.querySelector('.estado');
+      const enviar = async arquivo => {
+        if (!/\.pdf$/i.test(arquivo.name)) { estado.className = 'estado erro'; estado.textContent = 'Envie o PDF da LISTA DE CLIENTES.'; return; }
+        zona.style.pointerEvents = 'none';
+        estado.className = 'estado'; estado.textContent = 'Lendo o PDF…';
+        try {
+          const linhas = await linhasDoPdf(arquivo);
+          estado.textContent = 'Enviando…';
+          const r = await fetch('/api/clientes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vendedor: v.codigo, arquivo: arquivo.name, linhas }) });
+          const d = await r.json().catch(() => ({}));
+          if (r.status === 401) return location.replace('/');
+          if (!r.ok) throw Object.assign(new Error(d.erro || 'O envio não deu certo. Tente de novo.'), { nosso: true });
+          const novo = cartao(d.vendedor);
+          el.replaceWith(novo);
+          const est = novo.querySelector('.estado');
+          est.className = 'estado ok';
+          est.textContent = `Pronto! ${plural(d.vendedor.total, 'cliente', 'clientes')} do ${d.vendedor.nome} já valem para o Benjamim.`;
+        } catch (err) {
+          console.error(err);
+          estado.className = 'estado erro';
+          estado.textContent = err.nosso ? err.message : 'Não consegui ler o PDF. Confira se é a LISTA DE CLIENTES e tente de novo.';
+        } finally {
+          zona.style.pointerEvents = '';
+          inp.value = '';
+        }
+      };
+      inp.addEventListener('change', () => inp.files[0] && enviar(inp.files[0]));
+      ['dragenter', 'dragover'].forEach(ev => zona.addEventListener(ev, e => { e.preventDefault(); zona.classList.add('arrastando'); }));
+      ['dragleave', 'drop'].forEach(ev => zona.addEventListener(ev, () => zona.classList.remove('arrastando')));
+      zona.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) enviar(f); });
+      return el;
+    }
+
+    // Cada linha do PDF vira [[x, texto], ...], de cima para baixo, página por página
+    async function linhasDoPdf(arquivo) {
+      const pdfjs = await import(PDFJS + 'pdf.min.mjs');
+      pdfjs.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.mjs';
+      const doc = await pdfjs.getDocument({ data: new Uint8Array(await arquivo.arrayBuffer()), isEvalSupported: false }).promise;
+      const todas = [];
+      for (let p = 1; p <= doc.numPages; p++) {
+        const pg = await doc.getPage(p);
+        const tc = await pg.getTextContent();
+        const porY = new Map();
+        for (const it of tc.items) {
+          if (!it.str.trim()) continue;
+          const y = Math.round(it.transform[5]);
+          if (!porY.has(y)) porY.set(y, []);
+          porY.get(y).push([Math.round(it.transform[4]), it.str]);
+        }
+        for (const [, l] of [...porY].sort((a, b) => b[0] - a[0])) todas.push(l.sort((a, b) => a[0] - b[0]));
+        pg.cleanup();
+      }
+      await doc.destroy();
+      return todas;
+    }
+  </script>
+</body>
+</html>
