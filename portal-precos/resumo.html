@@ -24,9 +24,8 @@
   <main class="conteudo">
     <nav class="abas-pagina"><a href="/painel">Atualizar arquivos</a><a href="/resumo" aria-current="page">Resumo dos preços</a><a href="/clientes">Clientes dos vendedores</a></nav>
     <div class="cabecalho">
-      <span class="selo simples">O que o Benjamim usa agora</span>
       <h1 class="titulo">Resumo dos <span class="apagado">preços</span></h1>
-      <p class="sub">Quantos produtos e ofertas estão valendo, o que mudou no último envio e a lista completa para conferir.</p>
+      <p class="sub">O que o Benjamim está usando agora.</p>
     </div>
 
     <div class="aviso oculto" id="aviso" role="status"></div>
@@ -195,5 +194,6 @@
       if (grupo === 'mudou') { estado.limMudou = PASSO; mudou(); } else { estado.limLista = PASSO; lista(); }
     }));
   </script>
+  <script src="assets/menu.js" defer></script>
 </body>
 </html>

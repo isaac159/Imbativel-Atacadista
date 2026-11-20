@@ -333,3 +333,67 @@ button { font: inherit; }
 .vendedor summary { cursor: pointer; color: var(--texto); font-weight: 500; }
 .vendedor details ul { list-style: none; margin-top: 8px; display: grid; gap: 4px; max-height: 220px; overflow: auto; }
 .vendedor details li span { color: var(--texto3); }
+
+/* ---------- Menu do topo: botões "blob" (bolhas brancas enchem o botão; JS em assets/menu.js) ---------- */
+.topo nav { gap: 10px; margin-left: 24px; align-items: center; }
+.blob-btn {
+  --borda-blob: 1.5px;
+  position: relative; z-index: 1; isolation: isolate;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 9px 20px; border-radius: 30px;
+  font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+  color: var(--texto); text-decoration: none; background: none; border: 0;
+  transition: color .5s, transform .15s;
+}
+.topo nav a.blob-btn, .abas-pagina a.blob-btn { color: var(--texto); border: 0; background: none; padding: 9px 20px; }
+/* contorno prata */
+.blob-btn::before {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border: var(--borda-blob) solid rgba(255,255,255,.55); border-radius: 30px;
+}
+/* segundo contorno deslocado, que encaixa no primeiro ao passar o mouse */
+.blob-btn::after {
+  content: ""; position: absolute; z-index: -2; pointer-events: none;
+  left: calc(var(--borda-blob) * 2); top: calc(var(--borda-blob) * 2); width: 100%; height: 100%;
+  border: 1px solid rgba(255,255,255,.16); border-radius: 30px;
+  transition: all .3s .2s;
+}
+.blob-btn__inner { position: absolute; inset: 0; z-index: -1; overflow: hidden; border-radius: 30px; background: rgba(255,255,255,.03); }
+.blob-btn__blobs { position: relative; display: block; height: 100%; filter: url('#goo'); }
+.blob-btn__blob {
+  position: absolute; top: var(--borda-blob); width: 25%; height: 100%;
+  background: linear-gradient(180deg, #ffffff, #dcdcdf); border-radius: 100%;
+  transform: translate3d(0, var(--blob-y, 150%), 0) scale(1.4);
+  transition: transform .45s;
+}
+.blob-btn__blob:nth-child(1) { left: 0; }
+.blob-btn__blob:nth-child(2) { left: 30%; transition-delay: .08s; }
+.blob-btn__blob:nth-child(3) { left: 60%; transition-delay: .16s; }
+.blob-btn__blob:nth-child(4) { left: 90%; transition-delay: .24s; }
+
+/* cheio: mouse em cima (JS), foco do teclado ou página atual */
+.blob-btn.cheio, .blob-btn:focus-visible, .blob-btn[aria-current="page"] { color: #0a0a0a; }
+.blob-btn.cheio::after, .blob-btn:focus-visible::after, .blob-btn[aria-current="page"]::after { left: 0; top: 0; transition: all .3s; }
+.blob-btn.cheio .blob-btn__blob, .blob-btn:focus-visible .blob-btn__blob, .blob-btn[aria-current="page"] .blob-btn__blob { transform: translateZ(0) scale(1.4); }
+.blob-btn[aria-current="page"]::before { border-color: #fff; }
+.blob-btn:focus-visible { outline: none; }
+.blob-btn.sem-transicao .blob-btn__blob { transition: none; }
+.blob-btn.apertado { transform: scale(.96); }
+/* sem JS (ou navegador sem :hover via ponteiro) o hover simples ainda funciona */
+@media (hover: hover) { .blob-btn:not(.cheio):hover::after { left: 0; top: 0; } }
+@media (prefers-reduced-motion: reduce) { .blob-btn, .blob-btn__blob, .blob-btn::after { transition: none !important; } }
+
+/* celular: as três abas lado a lado, menores */
+.abas-pagina { gap: 6px; }
+.abas-pagina a.blob-btn { flex: 1; padding: 9px 6px; font-size: 10.5px; letter-spacing: .03em; white-space: normal; text-align: center; line-height: 1.2; min-height: 40px; }
+@media (max-width: 900px) and (min-width: 701px) { .topo nav { margin-left: 8px; gap: 6px; } .topo .blob-btn { padding: 8px 12px; font-size: 11px; } }
+/* texto preto quando o botão está cheio (vence as regras antigas do menu) */
+.topo nav a.blob-btn.cheio, .topo nav a.blob-btn:focus-visible, .topo nav a.blob-btn[aria-current="page"],
+.abas-pagina a.blob-btn.cheio, .abas-pagina a.blob-btn:focus-visible, .abas-pagina a.blob-btn[aria-current="page"] { color: #0a0a0a; border-bottom: 0; }
+/* telas médias: menu mais compacto para caber o "Sair" */
+@media (max-width: 1100px) and (min-width: 701px) {
+  .topo .dentro { gap: 10px; }
+  .topo nav { margin-left: 4px; gap: 6px; }
+  .topo nav a.blob-btn { padding: 8px 11px; font-size: 10.5px; letter-spacing: .03em; }
+  .topo .usuario #quem { display: none; }
+}
