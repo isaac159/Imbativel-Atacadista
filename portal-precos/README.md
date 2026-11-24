@@ -60,7 +60,8 @@ Se o portal não responder, o nó tenta 3 vezes e a busca devolve `ok: false` co
 Cada vendedor tem um quadro. O PDF "LISTA DE CLIENTES" do sistema da Imbatível é lido no navegador (posição de cada palavra) e o servidor separa as colunas (`api/_carteira.js`).
 - **Confere o vendedor**: se a lista enviada for de outro vendedor (coluna VEN), o portal recusa e diz de quem é.
 - **Confere se leu tudo**: compara com o rodapé "N CLIENTES LISTADOS".
-- **Telefone**: guarda já no formato do WhatsApp. Completa o DDD 43 quando falta (8 dígitos, ou 9 começando com 9). Os que não dá para usar aparecem no quadro como "clientes que o Benjamim não reconhece", para a equipe corrigir no sistema.
+- **Telefone (autocorreção)**: guarda no formato do WhatsApp (55 + DDD + 9 + 8 dígitos no celular). Corrige sozinho quando só existe uma leitura possível: DDD faltando (8 dígitos, ou 9 começando com 9 → DDD 43), o "3" do DDD que caiu ("49943 7494"), 0/operadora/55 na frente, e confere o DDD na lista oficial. Nenhum cliente é descartado.
+  - No quadro do vendedor aparecem os **telefones corrigidos** (antes → depois) e os **sem conserto**: sem telefone (`0000000`) ou com mais de uma leitura possível ("84 086 7033"). Esses o portal não chuta, para não ligar o cliente ao WhatsApp de outra pessoa.
 - Não guarda CPF/CNPJ, inscrição nem aniversário. Não há dado de cliente no código: a carteira vale a partir do primeiro envio de cada vendedor.
 - **Vendedor novo**: incluir em `VENDEDORES` (`api/_carteira.js`) e criar o caminho dele nos nós 15b e V5 do fluxo da EZ.
 

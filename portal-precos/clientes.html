@@ -84,9 +84,13 @@
         ];
         partes.push(`<details><summary>O que mudou no último envio: ${plural(m.n_novos, 'novo', 'novos')}, ${plural(m.n_sairam, 'saiu', 'saíram')}, ${plural(m.n_mudaram, 'mudou', 'mudaram')}</summary><ul>${li.join('')}</ul></details>`);
       }
+      if (v.n_corrigidos) {
+        const li = v.corrigidos.map(p => `<li>${esc(p.codigo)} ${esc(p.razao)} <span>${esc(p.telefone)} → ${esc(p.numero)} (${esc(p.como)})</span></li>`);
+        partes.push(`<details><summary>${plural(v.n_corrigidos, 'telefone corrigido', 'telefones corrigidos')} automaticamente</summary><ul>${li.join('')}</ul></details>`);
+      }
       if (v.n_problemas) {
         const li = v.problemas.map(p => `<li>${esc(p.codigo)} ${esc(p.razao)} <span>${p.motivo === 'sem telefone' ? 'sem telefone' : 'telefone incompleto: ' + esc(p.telefone)}</span></li>`);
-        partes.push(`<details><summary>${plural(v.n_problemas, 'cliente', 'clientes')} que o Benjamim não reconhece pelo WhatsApp</summary><p style="margin-top:6px">Sem telefone ou com telefone incompleto no cadastro. Corrija no sistema e envie a lista de novo.</p><ul>${li.join('')}</ul></details>`);
+        partes.push(`<details><summary>${plural(v.n_problemas, 'cliente', 'clientes')} que o Benjamim não reconhece pelo WhatsApp</summary><p style="margin-top:6px">Sem telefone no cadastro, ou com número que tem mais de uma leitura possível (o portal não chuta para não ligar o cliente ao WhatsApp de outra pessoa). Corrija no sistema e envie a lista de novo.</p><ul>${li.join('')}</ul></details>`);
       }
       return partes.join('');
     }

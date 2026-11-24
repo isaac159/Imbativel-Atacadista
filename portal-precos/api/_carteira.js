@@ -75,28 +75,62 @@ function normTelefone(t) {
   return d;
 }
 
-// Telefone como está no cadastro da Imbatível → 55+DDD+número, ou '' se não der para usar.
-// Corrige os casos claros de DDD faltando (a carteira é da região de Londrina, DDD 43):
-//   8 dígitos (3398 1222) e 9 dígitos começando com 9 (99121 0554) ganham o 43;
-//   "49943 7494" (o 3 do DDD caiu) vira 43 9943 7494.
-function telefoneDaLista(bruto) {
-  let d = String(bruto || '').replace(/\D/g, '');
-  if (!d || /^0+$/.test(d)) return '';
-  if (d.length === 8) d = '43' + d;
-  else if (d.length === 9 && d[0] === '9') d = '43' + d;
-  else if (d.length === 9 && d.startsWith('49')) d = '43' + d.slice(1);
-  const n = normTelefone(d);
-  return /^55\d{10,11}$/.test(n) ? n : '';
+// ---------- Autocorreção do telefone do cadastro ----------
+// O cadastro da Imbatível tem muitos telefones digitados fora do padrão. Aqui cada um vira o formato do WhatsApp
+// (55 + DDD + 9 + 8 dígitos no celular; 55 + DDD + 8 dígitos no fixo) quando só existe UMA leitura possível.
+// Quando há mais de uma leitura (ex.: "84 086 7033"), não chuta: um número errado poderia ser o WhatsApp de outra pessoa.
+const DDD_PADRAO = '43'; // a carteira é da região de Londrina
+const DDDS = new Set(('11 12 13 14 15 16 17 18 19 21 22 24 27 28 31 32 33 34 35 37 38 41 42 43 44 45 46 47 48 49 51 53 54 55 '
+  + '61 62 63 64 65 66 67 68 69 71 73 74 75 77 79 81 82 83 84 85 86 87 88 89 91 92 93 94 95 96 97 98 99').split(' '));
+
+// número (sem DDD) válido: celular 9 + 8 dígitos, ou fixo [2-5] + 7 dígitos; sem número de mentira (9999 9999)
+const numeroValido = n => (/^9[1-9]\d{7}$/.test(n) || /^[2-5]\d{7}$/.test(n)) && !/^(\d)\1+$/.test(n.slice(-8));
+
+// DDD + número (10 ou 11 dígitos) → 55+DDD+número, com o 9 nos celulares antigos de 8 dígitos; '' se não for válido
+function montarNumero(d) {
+  if (d.length !== 10 && d.length !== 11) return '';
+  const ddd = d.slice(0, 2);
+  let n = d.slice(2);
+  if (!DDDS.has(ddd)) return '';
+  if (n.length === 8 && /^[6-9]/.test(n)) n = '9' + n; // celular antigo, sem o 9
+  return numeroValido(n) ? '55' + ddd + n : '';
 }
 
-// Clientes cujo telefone no cadastro não dá para usar (o Benjamim não vai reconhecer pelo WhatsApp)
-function telefonesComProblema(clientes) {
-  return (clientes || []).filter(c => !telefoneDaLista(c.telefone)).map(c => ({
-    codigo: c.codigo, razao: c.razao,
-    telefone: String(c.telefone || '').replace(/\D/g, '') || '',
-    motivo: /^0*$/.test(String(c.telefone || '').replace(/\D/g, '')) ? 'sem telefone' : 'telefone incompleto'
-  }));
+// { numero: '5543999691796' | '', situacao: 'ok' | 'corrigido' | 'sem_telefone' | 'sem_conserto', como: texto da correção }
+function corrigirTelefone(bruto) {
+  let d = String(bruto || '').replace(/\D/g, '');
+  if (!d || /^0+$/.test(d) || /^(\d)\1+$/.test(d)) return { numero: '', situacao: 'sem_telefone', como: '' };
+  const original = d;
+  // prefixos que não são parte do número: 0 de discagem, 0 + operadora (015, 021…), 55 duplicado
+  if (/^0\d{2}\d{10,11}$/.test(d)) d = d.slice(3);           // 0 + operadora + DDD + número
+  else if (/^0\d{10,11}$/.test(d)) d = d.slice(1);          // 0 + DDD + número
+  if (/^55\d{10,11}$/.test(d)) d = d.slice(2);              // já vinha com 55
+  const opcoes = [];
+  const tenta = (cand, como) => { const n = montarNumero(cand); if (n && !opcoes.some(o => o.numero === n)) opcoes.push({ numero: n, como }); };
+  if (d.length === 10 || d.length === 11) tenta(d, 'formato');
+  else if (d.length === 8 || (d.length === 9 && d[0] === '9')) tenta(DDD_PADRAO + d, 'DDD 43 incluído');
+  else if (d.length === 9 && d[0] === DDD_PADRAO[0] && /[6-9]/.test(d[1])) tenta(DDD_PADRAO + d.slice(1), 'DDD 43 completado');
+  if (opcoes.length !== 1) return { numero: '', situacao: d.length ? 'sem_conserto' : 'sem_telefone', como: '' };
+  // pôr o 55 e o 9 do celular é só o formato do WhatsApp (o sistema guarda DDD + 8 dígitos); correção é completar o DDD
+  const como = opcoes[0].como === 'formato' ? '' : opcoes[0].como;
+  return { numero: opcoes[0].numero, situacao: como ? 'corrigido' : 'ok', como, original };
 }
+
+const telefoneDaLista = bruto => corrigirTelefone(bruto).numero;
+
+// Telefones que foram corrigidos sozinhos e os que ficaram sem conserto (aparecem no quadro do vendedor)
+function analisarTelefones(clientes) {
+  const corrigidos = [], semConserto = [];
+  for (const c of clientes || []) {
+    const r = corrigirTelefone(c.telefone);
+    const base = { codigo: c.codigo, razao: c.razao, telefone: String(c.telefone || '').replace(/\D/g, '') };
+    if (r.situacao === 'corrigido') corrigidos.push({ ...base, numero: r.numero, como: r.como });
+    else if (r.situacao !== 'ok') semConserto.push({ ...base, motivo: r.situacao === 'sem_telefone' ? 'sem telefone' : 'telefone incompleto' });
+  }
+  return { corrigidos, semConserto };
+}
+// compatibilidade: só os que o Benjamim não reconhece
+const telefonesComProblema = clientes => analisarTelefones(clientes).semConserto;
 
 // Valor vindo da EZ: variável vazia às vezes chega como "{{user.x}}" literal
 const limpo = v => String(v == null ? '' : v).replace(/\{\{.*?\}\}/g, '').trim();
@@ -181,4 +215,5 @@ function compararCarteira(antes, depois) {
 const enxuto = c => ({ codigo: c.codigo, razao: c.razao, bairro: c.bairro || '', cidade: c.cidade || '', comprador: c.comprador || '',
   telefone: telefoneDaLista(c.telefone), rota: c.rota || '', dia: c.dia || '0', obs: c.obs || '' });
 
-module.exports = { VENDEDORES, DIAS, lerListaClientes, consultarCarteira, compararCarteira, normTelefone, telefoneDaLista, telefonesComProblema, enxuto };
+module.exports = { VENDEDORES, DIAS, lerListaClientes, consultarCarteira, compararCarteira, normTelefone, corrigirTelefone, telefoneDaLista,
+  analisarTelefones, telefonesComProblema, enxuto };

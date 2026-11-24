@@ -4,7 +4,7 @@
 // O painel extrai do PDF "LISTA DE CLIENTES" as linhas com a posição de cada palavra; a leitura fica em _carteira.js.
 const { lerSessao, lerCorpoJson, json } = require('./_sessao');
 const { agoraBR } = require('./_leitura');
-const { VENDEDORES, lerListaClientes, compararCarteira, telefonesComProblema, enxuto } = require('./_carteira');
+const { VENDEDORES, lerListaClientes, compararCarteira, analisarTelefones, enxuto } = require('./_carteira');
 const { lerCarteira, gravarCarteira, registrarEnvio } = require('./_armazem');
 
 const MAX_LISTA = 200; // quantos itens de cada lista (novos, saíram, mudaram, problemas) ficam guardados
@@ -56,7 +56,8 @@ module.exports = async (req, res) => {
 
     const clientes = doVendedor.map(enxuto);
     const mud = compararCarteira(antes && antes.clientes, clientes);
-    const problemas = telefonesComProblema(doVendedor);
+    const tel = analisarTelefones(doVendedor);
+    const problemas = tel.semConserto;
     const quando = agoraBR();
     const corta = l => l.slice(0, MAX_LISTA);
     const mudancas = antes
@@ -65,7 +66,8 @@ module.exports = async (req, res) => {
 
     carteira.vendedores[ven] = {
       clientes, total: clientes.length, data_lista: r.data_lista, arquivo: String(corpo.arquivo || 'lista.pdf').slice(0, 120),
-      atualizada_em: quando, usuario: sessao.u, mudancas, problemas: corta(problemas), n_problemas: problemas.length, avisos
+      atualizada_em: quando, usuario: sessao.u, mudancas, problemas: corta(problemas), n_problemas: problemas.length,
+      corrigidos: corta(tel.corrigidos), n_corrigidos: tel.corrigidos.length, avisos
     };
     await gravarCarteira(carteira);
     await registrarEnvio({ em: quando, usuario: sessao.u, arquivos: [`Clientes ${nome} (${clientes.length})`],
