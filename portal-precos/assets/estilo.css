@@ -397,3 +397,10 @@ button { font: inherit; }
   .topo nav a.blob-btn { padding: 8px 11px; font-size: 10.5px; letter-spacing: .03em; }
   .topo .usuario #quem { display: none; }
 }
+
+/* Validade das ofertas (25/11): preenchida pelo PDF ou digitada quando o PDF não traz */
+.validade-campos { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.validade-campos label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--texto2); }
+.validade-campos input { height: 38px; padding: 0 10px; font: inherit; font-size: 14px; color: var(--texto); background: rgba(0,0,0,.35); border: 1px solid var(--borda); border-radius: 10px; color-scheme: dark; }
+.validade-campos input:focus { outline: none; border-color: rgba(255,255,255,.45); }
+.dica-validade { display: block; margin-top: 6px; color: var(--texto3); font-size: 12px; }

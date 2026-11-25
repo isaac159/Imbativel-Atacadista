@@ -56,6 +56,12 @@ Sem banco configurado, os preços ficam na pasta `.dados/`. Apague essa pasta pa
 
 Se o portal não responder, o nó tenta 3 vezes e a busca devolve `ok: false` com a orientação "vendedor confirma o preço", e o Benjamim não inventa valor.
 
+## PDF de ofertas em qualquer modelo
+Cada semana a Imbatível pode mandar um PDF diferente. O painel lê em duas etapas (`api/ofertas.js`):
+1. **Leitores por regra** (instantâneo, sem custo): os modelos já conhecidos ("Ofertas fecha mês", "Pré Black Friday") e um leitor genérico. A leitura só vale se achou quase todos os blocos de preço e os nomes parecem nomes de produto (`leituraConfiavel`).
+2. **Leitura por IA** quando o modelo é novo: o painel manda o texto de 1 página por vez, 4 ao mesmo tempo, para o Claude Opus 5.5 (`api/_ia.js`, saída em JSON com esquema fixo e `fallbacks: "default"` se o modelo recusar). Junta as páginas sem repetir oferta. Custo estimado: uns US$ 0,60 por PDF de 28 páginas. Precisa de `ANTHROPIC_API_KEY` na Vercel; sem ela, PDF de modelo novo dá o aviso "Avise a Matte".
+- **Validade**: o cartão das ofertas tem "Válida de / até". Se o PDF trouxer a data, ela é preenchida sozinha; se não trouxer, o envio para e pede as datas (sem ler o PDF de novo).
+
 ## Carteira de clientes (aba "Clientes dos vendedores")
 Cada vendedor tem um quadro. O PDF "LISTA DE CLIENTES" do sistema da Imbatível é lido no navegador (posição de cada palavra) e o servidor separa as colunas (`api/_carteira.js`).
 - **Confere o vendedor**: se a lista enviada for de outro vendedor (coluna VEN), o portal recusa e diz de quem é.

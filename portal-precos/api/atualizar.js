@@ -1,8 +1,9 @@
-// POST /api/atualizar  (JSON)  { ofertas?: {arquivo, texto}, tabela?: {arquivo, linhas} }
+// POST /api/atualizar  (JSON)  { ofertas?: {arquivo, itens | texto, validade?: {inicio, fim}}, tabela?: {arquivo, linhas} }
+// As ofertas chegam já lidas pelo /api/ofertas (regra ou IA); a validade pode vir digitada na tela.
 // O painel extrai no navegador o texto do PDF e as linhas da planilha (assim o PDF pesado não precisa subir)
 // e manda só isso. Aqui o texto vira ofertas/tabela, é comparado com o que havia e passa a valer para o Benjamim.
 const { lerSessao, lerCorpoJson, json } = require('./_sessao');
-const { lerOfertas, lerTabela, compararTabela, compararOfertas, agoraBR } = require('./_leitura');
+const { lerOfertas, lerTabela, compararTabela, compararOfertas, agoraBR, normalizarOfertas } = require('./_leitura');
 const { lerPrecos, gravarPrecos, registrarEnvio } = require('./_armazem');
 
 const MAX_LISTA = 300; // quantos itens de cada lista de mudanças ficam guardados no histórico
@@ -30,10 +31,18 @@ module.exports = async (req, res) => {
     const avisos = [];
 
     if (envOf) {
-      const r = lerOfertas(envOf.texto);
-      if (!r.itens.length) return json(res, 422, { erro: 'Não achei ofertas nesse PDF. Confira se é o PDF de ofertas no modelo de sempre.' });
-      if (!r.validade) avisos.push('Não achei a validade no PDF. O Benjamim só oferece promoções com validade, então confira o arquivo.');
-      else if (dataISO(r.validade.fim) < quando.slice(0, 10)) avisos.push(`As ofertas desse PDF venceram em ${r.validade.fim}. O Benjamim não vai oferecê-las.`);
+      // ofertas já lidas no painel (por regra ou por IA); sem isso, o texto do PDF (painel antigo)
+      let itens, validade;
+      if (Array.isArray(envOf.itens)) itens = normalizarOfertas(envOf.itens);
+      else { const lido = lerOfertas(envOf.texto); itens = lido.itens; validade = lido.validade; }
+      // validade digitada na tela vale por cima da que veio do PDF
+      const v = envOf.validade || {};
+      if (dataISO(v.inicio) && dataISO(v.fim)) validade = { inicio: v.inicio, fim: v.fim };
+      if (!itens.length) return json(res, 422, { erro: 'Não achei ofertas nesse PDF. Confira se é o PDF de ofertas.' });
+      if (!validade) return json(res, 422, { erro: 'Esse PDF não traz a validade. Preencha "Válida de" e "até" e envie de novo.', pedir_validade: true });
+      if (dataISO(validade.fim) < dataISO(validade.inicio)) return json(res, 422, { erro: 'A data final da validade é antes da inicial. Confira as datas.', pedir_validade: true });
+      if (dataISO(validade.fim) < quando.slice(0, 10)) avisos.push(`As ofertas venceram em ${validade.fim}. O Benjamim não vai oferecê-las.`);
+      const r = { validade, itens };
       const c = compararOfertas(atual.ofertas && atual.ofertas.itens, r.itens);
       novo.ofertas = r;
       novo.ofertas_atualizadas_em = quando;

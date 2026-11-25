@@ -47,6 +47,11 @@
             <small>Somente .pdf</small>
           </label>
           <div class="arquivo oculto" id="sel-pdf"></div>
+          <div class="validade-campos">
+            <label>Válida de <input type="date" id="val-ini"></label>
+            <label>até <input type="date" id="val-fim"></label>
+          </div>
+          <small class="dica-validade" id="dica-val">Se o PDF trouxer a data, ela é preenchida sozinha.</small>
         </article>
 
         <article class="bloco vidro-cartao">
@@ -153,6 +158,7 @@
 
     for (const [alvo, inp] of Object.entries(entradas)) {
       inp.addEventListener('change', () => {
+        if (alvo === 'pdf') { leitura = null; valIni.value = ''; valFim.value = ''; }
         if (inp.files[0] && !aceitar(alvo, inp.files[0])) inp.value = '';
         atualizar();
       });
@@ -181,7 +187,63 @@
         pg.cleanup();
       }
       await doc.destroy();
-      return paginas.join('\n');
+      return paginas;
+    }
+
+    // ---- Ofertas: leitor por regra; se o modelo do PDF for novo, leitura por IA em lotes de páginas ----
+    let leitura = null; // { chave, itens, validade, modo }: guardada para não ler de novo se faltar só a validade
+    const valIni = document.getElementById('val-ini'), valFim = document.getElementById('val-fim');
+    const paraBR = iso => iso ? iso.split('-').reverse().join('/') : '';
+    const paraISO = br => { const m = String(br || '').match(/(\d{2})\/(\d{2})\/(\d{4})/); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; };
+    const POR_LOTE = 1, AO_MESMO_TEMPO = 4; // 1 página por chamada cabe no limite de 60 s da Vercel
+
+    async function postar(url, corpo) {
+      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
+      const d = await r.json().catch(() => ({}));
+      if (r.status === 401) { location.replace('/'); throw new Error('sessão'); }
+      if (!r.ok) throw Object.assign(new Error(d.erro || 'O envio não deu certo. Tente de novo.'), { nosso: true, dados: d });
+      return d;
+    }
+
+    async function lerOfertasDoPdf(arquivo, passo) {
+      const chave = arquivo.name + '|' + arquivo.size + '|' + arquivo.lastModified;
+      if (leitura && leitura.chave === chave) return leitura;
+      passo('Lendo o PDF…');
+      const paginas = await textoDoPdf(arquivo);
+      const r = await postar('/api/ofertas', { acao: 'regras', texto: paginas.join('\f') });
+      if (r.confiavel) return (leitura = { chave, itens: r.itens, validade: r.validade, modo: 'regras' });
+      if (!r.ia_disponivel) throw Object.assign(new Error('Esse modelo de PDF é novo e a leitura por IA ainda não está ligada no portal. Avise a Matte.'), { nosso: true });
+      // uma página por chamada, 4 chamadas ao mesmo tempo
+      const lotes = [];
+      for (let i = 0; i < paginas.length; i += POR_LOTE) lotes.push(paginas.slice(i, i + POR_LOTE).map((texto, k) => ({ numero: i + k + 1, texto })));
+      const resultados = new Array(lotes.length);
+      let feitos = 0, prox = 0;
+      passo(`Modelo novo de PDF: lendo com IA (0 de ${paginas.length} páginas)…`);
+      const trabalhador = async () => {
+        while (prox < lotes.length) {
+          const n = prox++;
+          let tentativa = 0;
+          for (;;) {
+            try { resultados[n] = await postar('/api/ofertas', { acao: 'ia', paginas: lotes[n] }); break; }
+            catch (e) { if (++tentativa >= 2) throw e; }
+          }
+          feitos += lotes[n].length;
+          passo(`Modelo novo de PDF: lendo com IA (${feitos} de ${paginas.length} páginas)…`);
+        }
+      };
+      await Promise.all(Array.from({ length: Math.min(AO_MESMO_TEMPO, lotes.length) }, trabalhador));
+      // junta os lotes sem repetir a mesma oferta
+      const vistos = new Set(), itens = [];
+      let validade = null;
+      for (const res of resultados) {
+        if (!validade && res.validade) validade = res.validade;
+        for (const it of res.itens) {
+          const k = (it.produto + '|' + it.variacoes + '|' + it.preco_oferta).toLowerCase();
+          if (!vistos.has(k)) { vistos.add(k); itens.push(it); }
+        }
+      }
+      if (!itens.length) throw Object.assign(new Error('Não achei ofertas nesse PDF, nem lendo com IA. Confira se é o PDF de ofertas.'), { nosso: true });
+      return (leitura = { chave, itens, validade, modo: 'ia' });
     }
 
     function carregarScript(src) {
@@ -243,15 +305,22 @@
       const passo = t => { btn.innerHTML = '<span class="girando"></span>' + t; };
       try {
         const corpo = {};
-        if (pdf) { passo('Lendo o PDF…'); corpo.ofertas = { arquivo: pdf.name, texto: await textoDoPdf(pdf) }; }
+        if (pdf) {
+          const lido = await lerOfertasDoPdf(pdf, passo);
+          if (lido.validade && !valIni.value && !valFim.value) { valIni.value = paraISO(lido.validade.inicio); valFim.value = paraISO(lido.validade.fim); }
+          if (!valIni.value || !valFim.value) {
+            valIni.focus();
+            throw Object.assign(new Error(`Li ${lido.itens.length} ofertas, mas esse PDF não traz a validade. Preencha "Válida de" e "até" e clique em enviar de novo.`), { nosso: true });
+          }
+          corpo.ofertas = { arquivo: pdf.name, itens: lido.itens, validade: { inicio: paraBR(valIni.value), fim: paraBR(valFim.value) }, modo: lido.modo };
+        }
         if (xls) { passo('Lendo a planilha…'); corpo.tabela = { arquivo: xls.name, linhas: await linhasDaPlanilha(xls) }; }
         passo('Enviando…');
-        const r = await fetch('/api/atualizar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
-        const d = await r.json().catch(() => ({}));
-        if (r.status === 401) { location.replace('/'); return; }
-        if (!r.ok) throw Object.assign(new Error(d.erro || 'O envio não deu certo. Tente de novo.'), { nosso: true });
+        const d = await postar('/api/atualizar', corpo);
+        if (corpo.ofertas && corpo.ofertas.modo === 'ia') d.registro.avisos = ['Modelo novo de PDF: as ofertas foram lidas com IA. Confira em "Resumo dos preços".', ...(d.registro.avisos || [])];
         mostrarResultado(d.registro);
         Object.values(entradas).forEach(i => i.value = '');
+        leitura = null; valIni.value = ''; valFim.value = '';
         carregarHist();
       } catch (err) {
         console.error(err);
