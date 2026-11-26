@@ -118,7 +118,8 @@
       </div>
     </div>
 
-    <script>
+    <!-- module: só roda depois do menu.js (defer), que é quem cria #quem e #sair -->
+    <script type="module">
       const PASSO = 50;
       const MANUAL = ' <span class="selo-manual" title="Lançado na aba Manual">manual</span>';
       const estado = { mudou: 'tabela', lista: 'tabela', limMudou: PASSO, limLista: PASSO, busca: '' };
