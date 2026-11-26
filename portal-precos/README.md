@@ -16,6 +16,7 @@ resumo.html       números, o que mudou no último envio e a lista de preços va
 clientes.html     um quadro por vendedor para enviar a LISTA DE CLIENTES (PDF) de cada um
 manual.html       aba Manual: preço de tabela, oferta e contato de cliente digitados à mão
 assets/menu.js    menu lateral de todas as páginas (lista PAGINAS) e os botões "blob"
+assets/carregando.js  tela de carregamento da Matte entre as páginas, no login e no Sair
 assets/           estilo.css, logos e ícones
 api/login.js      POST: confere usuário e senha e grava o cookie de sessão (12 h)
 api/sessao.js     GET: quem está logado · DELETE: sair
@@ -123,6 +124,16 @@ O menu fica na lateral (recolhe só para os ícones e vira gaveta no celular). A
 - Quando a lista em PDF do vendedor for enviada de novo, o contato manual cujo número veio na lista sai da aba Manual sozinho.
 
 Tudo o que é lançado à mão fica em "Últimos lançamentos manuais" e aparece em "Últimos envios da equipe". No Resumo, o item lançado à mão leva o selo **manual**.
+
+## Tela de carregamento
+
+Ao trocar de página (menu, logo e links como "Ver o que mudou"), depois que a senha confere no login e no **Sair**, abre a tela com a logo da Matte animada (`assets/carregando.js`, estilos em "Tela de carregamento" no `estilo.css`).
+
+- A animação continua de uma página para a outra: quem clica grava a hora em `sessionStorage` e a página nova abre a tela no mesmo ponto, antes de desenhar qualquer coisa. Por isso o `carregando.js` entra no `<head>` sem `defer`, logo depois do `estilo.css`.
+- A página nova chama `portalCarregando.pronto()` quando os dados chegam. Aí as letras entram na seta, a seta sai voando e a tela some. Se a página nunca avisar, a tela sai sozinha em 12 s.
+- Botões dentro da página (Tabela/Ofertas, Preços/Contatos) trocam na hora, sem a tela. Ctrl+clique (nova aba) também fica de fora.
+- Tempos no começo do `carregando.js`: `MINIMO` (tempo mínimo na tela, 1,2 s desde o clique) e `CICLO` (uma volta da animação).
+- Quem tem "reduzir movimento" ligado no sistema vê só a seta piscando, sem as letras andando.
 
 ## Limites
 

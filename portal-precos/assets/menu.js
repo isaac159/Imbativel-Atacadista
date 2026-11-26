@@ -9,27 +9,32 @@
 //     (filtro SVG #goo deixa o efeito gosmento). Página atual (aria-current) e aba ativa (aria-pressed) ficam cheias.
 //   - recolher: o menu encolhe só para os ícones (fica lembrado no navegador).
 //   - celular: o menu vira gaveta, aberta pelo botão da barra do topo.
+//   - troca de página: qualquer link para outra página do portal abre a tela de carregamento (carregando.js).
 (function () {
   const PAGINAS = [
     {
       href: '/painel',
       nome: 'Atualizar arquivos',
+      carregando: 'Abrindo os arquivos…',
       icone: '<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>'
     },
     {
       href: '/resumo',
       nome: 'Resumo dos preços',
+      carregando: 'Abrindo o resumo…',
       icone: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'
     },
     {
       href: '/clientes',
       nome: 'Clientes dos vendedores',
+      carregando: 'Abrindo os clientes…',
       icone:
         '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>'
     },
     {
       href: '/manual',
       nome: 'Manual',
+      carregando: 'Abrindo o Manual…',
       icone: '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>'
     }
   ];
@@ -178,7 +183,25 @@
     lateral.querySelectorAll('.lateral-nav a').forEach(blob);
   }
 
+  // ---------- troca de página com a tela de carregamento ----------
+
+  // Link para outra página do portal (menu, logo, "Ver o que mudou"…) abre a tela antes de trocar.
+  // Ficam de fora: Ctrl/⌘/Shift+clique (nova aba), links externos, downloads e âncoras na mesma página.
+  function trocarPagina(e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest('a[href]');
+    if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download') || !window.portalCarregando) return;
+    const url = new URL(a.href, location.href);
+    if (url.origin !== location.origin) return;
+    const caminho = url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+    if (caminho === (location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/') && url.hash) return;
+    e.preventDefault();
+    const pagina = PAGINAS.find(p => p.href === caminho);
+    window.portalCarregando.ir(url.href, { texto: pagina ? pagina.carregando : 'Carregando…' });
+  }
+
   function iniciar() {
+    document.addEventListener('click', trocarPagina);
     filtroGoo();
     const lateral = document.getElementById('lateral');
     if (lateral) montarMenu(lateral);

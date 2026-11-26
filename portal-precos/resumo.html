@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="assets/estilo.css" />
+    <script src="assets/carregando.js"></script>
     <script src="assets/menu.js" defer></script>
   </head>
   <body class="oculto" id="corpo">
@@ -153,14 +154,18 @@
           if (!r.ok) return location.replace('/');
           $('quem').textContent = (await r.json()).usuario;
           $('corpo').classList.remove('oculto');
-          carregar();
+          await carregar();
+          portalCarregando.pronto();
         })
         .catch(() => location.replace('/'));
 
-      $('sair').addEventListener('click', async () => {
-        await fetch('/api/sessao', { method: 'DELETE' }).catch(() => {});
-        location.replace('/');
-      });
+      $('sair').addEventListener('click', () =>
+        portalCarregando.ir('/', {
+          texto: 'Saindo…',
+          substituir: true,
+          antes: () => fetch('/api/sessao', { method: 'DELETE' })
+        })
+      );
 
       async function carregar() {
         try {

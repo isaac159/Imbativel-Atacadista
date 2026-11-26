@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="assets/estilo.css" />
+    <script src="assets/carregando.js"></script>
   </head>
   <body>
     <div class="fundo">
@@ -106,6 +107,7 @@
       const botao = document.getElementById('entrar');
       const senha = document.getElementById('senha');
       const ROTULO = 'Entrar';
+      portalCarregando.pronto(); // veio do Sair: a tela de carregamento sai
 
       // Já logado? vai direto para o painel
       fetch('/api/sessao')
@@ -140,7 +142,7 @@
           });
           const d = await r.json().catch(() => ({}));
           if (!r.ok) throw new Error(d.erro || 'Não foi possível entrar.');
-          location.replace('/painel');
+          portalCarregando.ir('/painel', { texto: 'Entrando…', substituir: true });
         } catch (err) {
           mostrarErro(err.message);
           senha.select();

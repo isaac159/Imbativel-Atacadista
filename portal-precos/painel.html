@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="assets/estilo.css" />
+    <script src="assets/carregando.js"></script>
     <script src="assets/menu.js" defer></script>
   </head>
   <body class="oculto" id="corpo">
@@ -152,14 +153,18 @@
           const d = await r.json();
           document.getElementById('quem').textContent = d.usuario;
           document.getElementById('corpo').classList.remove('oculto');
-          carregarHist();
+          await carregarHist();
+          portalCarregando.pronto();
         })
         .catch(() => location.replace('/'));
 
-      document.getElementById('sair').addEventListener('click', async () => {
-        await fetch('/api/sessao', { method: 'DELETE' }).catch(() => {});
-        location.replace('/');
-      });
+      document.getElementById('sair').addEventListener('click', () =>
+        portalCarregando.ir('/', {
+          texto: 'Saindo…',
+          substituir: true,
+          antes: () => fetch('/api/sessao', { method: 'DELETE' })
+        })
+      );
 
       const kb = b =>
         b > 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
