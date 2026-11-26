@@ -345,6 +345,13 @@ button {
   font-size: 14px;
   margin: 6px 0 24px;
 }
+/* seta da Matte no topo do cartão de login */
+.seta-login {
+  display: block;
+  width: 68px;
+  height: auto;
+  margin: 0 auto 24px;
+}
 
 .campo {
   margin-bottom: 16px;
