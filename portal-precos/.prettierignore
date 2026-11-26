@@ -1,0 +1,6 @@
+node_modules/
+.dados/
+.vercel/
+package-lock.json
+api/_inicial.json
+n8n/

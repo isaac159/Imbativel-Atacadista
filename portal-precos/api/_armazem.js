@@ -33,7 +33,13 @@ function redisNativo() {
     const { createClient } = require('redis');
     const cliente = createClient({ url: URL_REDIS, socket: { connectTimeout: 5000 } });
     cliente.on('error', e => console.error('Redis:', e.message));
-    conexao = cliente.connect().then(() => cliente).catch(e => { conexao = null; throw e; });
+    conexao = cliente
+      .connect()
+      .then(() => cliente)
+      .catch(e => {
+        conexao = null;
+        throw e;
+      });
   }
   return conexao;
 }
@@ -86,5 +92,23 @@ async function lerCarteira() {
   return (await ler('carteira')) || { vendedores: {} };
 }
 
-module.exports = { lerPrecos, gravarPrecos: v => gravar('precos', v), lerHistorico, registrarEnvio,
-  lerCarteira, gravarCarteira: v => gravar('carteira', v) };
+// Registro da aba Manual: cada preço, oferta ou contato lançado à mão, mais recente primeiro (últimos 60)
+async function lerRegistroManual() {
+  return (await ler('manual')) || [];
+}
+
+async function registrarManual(itens) {
+  const atual = await lerRegistroManual();
+  await gravar('manual', [...itens, ...atual].slice(0, 60));
+}
+
+module.exports = {
+  lerPrecos,
+  gravarPrecos: v => gravar('precos', v),
+  lerHistorico,
+  registrarEnvio,
+  lerCarteira,
+  gravarCarteira: v => gravar('carteira', v),
+  lerRegistroManual,
+  registrarManual
+};

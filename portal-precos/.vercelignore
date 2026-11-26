@@ -3,3 +3,6 @@ dev.js
 README.md
 .dados/
 n8n/
+.prettierrc.json
+.prettierignore
+.editorconfig

@@ -3,7 +3,7 @@
 // Corpo (JSON): { teste_telefone, telefone_consulta, identifier, codigo_cliente, pedido_vendedor_codigo }
 // Protegido por chave: cabeçalho  Authorization: Bearer <PORTAL_CHAVE_N8N>  (a mesma chave da consulta de preços)
 const { iguais, lerCorpoJson, json } = require('./_sessao');
-const { consultarCarteira } = require('./_carteira');
+const { consultarCarteira, carteiraVazia } = require('./_carteira');
 const { lerCarteira } = require('./_armazem');
 
 module.exports = async (req, res) => {
@@ -14,11 +14,15 @@ module.exports = async (req, res) => {
   if (!iguais(enviada, chave)) return json(res, 401, { erro: 'Chave inválida' });
 
   let corpo;
-  try { corpo = await lerCorpoJson(req, 64 * 1024); } catch (e) { return json(res, 400, { erro: 'Corpo inválido' }); }
+  try {
+    corpo = await lerCorpoJson(req, 64 * 1024);
+  } catch (e) {
+    return json(res, 400, { erro: 'Corpo inválido' });
+  }
   try {
     const carteira = await lerCarteira();
     // nenhuma lista enviada ainda: responde erro para o fluxo seguir pelo caminho "carteira indisponível"
-    if (!Object.keys(carteira.vendedores || {}).length) return json(res, 503, { erro: 'Nenhuma lista de clientes enviada ainda' });
+    if (carteiraVazia(carteira)) return json(res, 503, { erro: 'Nenhuma lista de clientes enviada ainda' });
     return json(res, 200, consultarCarteira(carteira, corpo || {}));
   } catch (e) {
     console.error(e);

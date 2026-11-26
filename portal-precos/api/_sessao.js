@@ -33,7 +33,9 @@ function iguais(a, b) {
 }
 
 function conferirLogin(usuario, senha) {
-  const u = String(usuario || '').trim().toLowerCase();
+  const u = String(usuario || '')
+    .trim()
+    .toLowerCase();
   let ok = false;
   for (const cad of usuarios()) {
     if (iguais(cad.usuario, u) & iguais(cad.senha, senha || '')) ok = true;
@@ -60,10 +62,12 @@ function apagarCookie() {
 
 function lerSessao(req) {
   const cookies = Object.fromEntries(
-    String(req.headers.cookie || '').split(';').map(c => {
-      const i = c.indexOf('=');
-      return [c.slice(0, i).trim(), c.slice(i + 1).trim()];
-    })
+    String(req.headers.cookie || '')
+      .split(';')
+      .map(c => {
+        const i = c.indexOf('=');
+        return [c.slice(0, i).trim(), c.slice(i + 1).trim()];
+      })
   );
   const valor = cookies[COOKIE];
   if (!valor || !valor.includes('.')) return null;
@@ -80,8 +84,13 @@ function lerSessao(req) {
 // Corpo JSON da requisição. Na Vercel o req.body já vem pronto; no dev.js lemos o fluxo.
 async function lerCorpoJson(req, limite) {
   if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body)) return req.body;
-  const partes = []; let n = 0;
-  for await (const p of req) { n += p.length; if (n > limite) throw new Error('grande demais'); partes.push(p); }
+  const partes = [];
+  let n = 0;
+  for await (const p of req) {
+    n += p.length;
+    if (n > limite) throw new Error('grande demais');
+    partes.push(p);
+  }
   return JSON.parse(Buffer.concat(partes).toString('utf8') || '{}');
 }
 

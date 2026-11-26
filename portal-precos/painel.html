@@ -1,336 +1,507 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex, nofollow">
-  <title>Atualizar arquivos · Portal Imbatível</title>
-  <link rel="icon" href="assets/logo-imbativel-quadrado.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/estilo.css">
-</head>
-<body class="oculto" id="corpo">
-  <div class="fundo">
-  <header class="topo">
-    <div class="dentro">
-      <div class="marcas"><img src="assets/logo-imbativel.webp" alt="Imbatível Atacadista"><span class="divisa"></span><img class="matte" src="assets/logo-matte.png" alt="Matte"></div>
-      <nav><a href="/painel" aria-current="page">Atualizar arquivos</a><a href="/resumo">Resumo dos preços</a><a href="/clientes">Clientes dos vendedores</a></nav>
-      <div class="usuario"><span id="quem"></span><button class="botao vidro" id="sair" type="button">Sair</button></div>
-    </div>
-  </header>
-
-  <main class="conteudo">
-    <nav class="abas-pagina"><a href="/painel" aria-current="page">Atualizar arquivos</a><a href="/resumo">Resumo dos preços</a><a href="/clientes">Clientes dos vendedores</a></nav>
-    <div class="cabecalho">
-      <h1 class="titulo">Atualizar <span class="apagado">arquivos</span></h1>
-      <p class="sub">Envie o PDF das ofertas e a tabela de preços.</p>
-    </div>
-
-    <div class="aviso oculto" id="aviso" role="status"></div>
-    <div class="resultado vidro-cartao oculto" id="resultado" role="status"></div>
-
-    <form id="form-envio">
-      <div class="grade">
-        <article class="bloco vidro-cartao">
-          <div class="cab">
-            <img class="icone-img" src="assets/icone-pdf.png" alt="PDF" width="48" height="48">
-            <h2>Ofertas da semana</h2>
-            <span class="etiqueta destaque">Toda semana</span>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Atualizar arquivos · Portal Imbatível</title>
+    <link rel="icon" href="assets/logo-imbativel-quadrado.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/estilo.css" />
+    <script src="assets/menu.js" defer></script>
+  </head>
+  <body class="oculto" id="corpo">
+    <div class="fundo">
+      <aside class="lateral" id="lateral"></aside>
+      <div class="pagina">
+        <main class="conteudo">
+          <div class="cabecalho">
+            <h1 class="titulo">Atualizar <span class="apagado">arquivos</span></h1>
+            <p class="sub">Envie o PDF das ofertas e a tabela de preços.</p>
           </div>
-          <p>O PDF com as ofertas e a validade. O Benjamim só oferece o que estiver dentro da validade.</p>
-          <label class="soltar" data-alvo="pdf">
-            <input type="file" accept=".pdf,application/pdf" id="arq-pdf">
-            <span class="nuvem"><svg viewBox="0 0 64 48" aria-hidden="true"><defs><linearGradient id="g-nuvem" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#8e8e95"/><stop offset=".55" stop-color="#e4e4e7"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs><path d="M16 46a14 14 0 0 1-1.6-27.9A18 18 0 0 1 49 16.3 13 13 0 0 1 50 46z" fill="url(#g-nuvem)"/><path d="M32 37V21M25 27.5l7-7 7 7" fill="none" stroke="#0a0a0a" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <b>Arraste o PDF aqui ou clique para escolher</b>
-            <small>Somente .pdf</small>
-          </label>
-          <div class="arquivo oculto" id="sel-pdf"></div>
-          <div class="validade-campos">
-            <label>Válida de <input type="date" id="val-ini"></label>
-            <label>até <input type="date" id="val-fim"></label>
-          </div>
-          <small class="dica-validade" id="dica-val">Se o PDF trouxer a data, ela é preenchida sozinha.</small>
-        </article>
 
-        <article class="bloco vidro-cartao">
-          <div class="cab">
-            <img class="icone-img" src="assets/icone-excel.png" alt="Excel" width="48" height="48">
-            <h2>Tabela de preços padrão</h2>
-            <span class="etiqueta">Quando mudar</span>
+          <div class="aviso oculto" id="aviso" role="status"></div>
+          <div class="resultado vidro-cartao oculto" id="resultado" role="status"></div>
+
+          <form id="form-envio">
+            <div class="grade">
+              <article class="bloco vidro-cartao">
+                <div class="cab">
+                  <img class="icone-img" src="assets/icone-pdf.png" alt="PDF" width="48" height="48" />
+                  <h2>Ofertas da semana</h2>
+                  <span class="etiqueta destaque">Toda semana</span>
+                </div>
+                <p>O PDF com as ofertas e a validade. O Benjamim só oferece o que estiver dentro da validade.</p>
+                <label class="soltar" data-alvo="pdf">
+                  <input type="file" accept=".pdf,application/pdf" id="arq-pdf" />
+                  <span class="nuvem"
+                    ><svg viewBox="0 0 64 48" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="g-nuvem" x1="0" y1="1" x2="1" y2="0">
+                          <stop offset="0" stop-color="#8e8e95" />
+                          <stop offset=".55" stop-color="#e4e4e7" />
+                          <stop offset="1" stop-color="#ffffff" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M16 46a14 14 0 0 1-1.6-27.9A18 18 0 0 1 49 16.3 13 13 0 0 1 50 46z"
+                        fill="url(#g-nuvem)"
+                      />
+                      <path
+                        d="M32 37V21M25 27.5l7-7 7 7"
+                        fill="none"
+                        stroke="#0a0a0a"
+                        stroke-width="3.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      /></svg
+                  ></span>
+                  <b>Arraste o PDF aqui ou clique para escolher</b>
+                  <small>Somente .pdf</small>
+                </label>
+                <div class="arquivo oculto" id="sel-pdf"></div>
+                <div class="validade-campos">
+                  <label>Válida de <input type="date" id="val-ini" /></label>
+                  <label>até <input type="date" id="val-fim" /></label>
+                </div>
+                <small class="dica-validade" id="dica-val">Se o PDF trouxer a data, ela é preenchida sozinha.</small>
+              </article>
+
+              <article class="bloco vidro-cartao">
+                <div class="cab">
+                  <img class="icone-img" src="assets/icone-excel.png" alt="Excel" width="48" height="48" />
+                  <h2>Tabela de preços padrão</h2>
+                  <span class="etiqueta">Quando mudar</span>
+                </div>
+                <p>A planilha com todos os produtos e preços fixos. A tabela nova substitui a anterior inteira.</p>
+                <label class="soltar" data-alvo="xls">
+                  <input type="file" accept=".xlsx,.xls" id="arq-xls" />
+                  <span class="nuvem"
+                    ><svg viewBox="0 0 64 48" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="g-nuvem2" x1="0" y1="1" x2="1" y2="0">
+                          <stop offset="0" stop-color="#8e8e95" />
+                          <stop offset=".55" stop-color="#e4e4e7" />
+                          <stop offset="1" stop-color="#ffffff" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M16 46a14 14 0 0 1-1.6-27.9A18 18 0 0 1 49 16.3 13 13 0 0 1 50 46z"
+                        fill="url(#g-nuvem2)"
+                      />
+                      <path
+                        d="M32 37V21M25 27.5l7-7 7 7"
+                        fill="none"
+                        stroke="#0a0a0a"
+                        stroke-width="3.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      /></svg
+                  ></span>
+                  <b>Arraste a planilha aqui ou clique para escolher</b>
+                  <small>.xlsx ou .xls</small>
+                </label>
+                <div class="arquivo oculto" id="sel-xls"></div>
+              </article>
+            </div>
+
+            <div class="acoes">
+              <button class="botao" type="submit" id="enviar" disabled>Enviar para o Benjamim</button>
+              <span class="nota" id="nota">Escolha pelo menos um arquivo.</span>
+            </div>
+          </form>
+
+          <section class="historico">
+            <h3>Últimos envios da equipe</h3>
+            <ul id="lista" class="vidro-cartao">
+              <li class="vazio">Carregando…</li>
+            </ul>
+          </section>
+        </main>
+
+        <footer class="rodape-portal">
+          <div class="dentro">
+            <span>Imbatível Atacadista · Jataizinho/PR</span><span>Portal do Benjamim · Matte</span>
           </div>
-          <p>A planilha com todos os produtos e preços fixos. A tabela nova substitui a anterior inteira.</p>
-          <label class="soltar" data-alvo="xls">
-            <input type="file" accept=".xlsx,.xls" id="arq-xls">
-            <span class="nuvem"><svg viewBox="0 0 64 48" aria-hidden="true"><defs><linearGradient id="g-nuvem2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#8e8e95"/><stop offset=".55" stop-color="#e4e4e7"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs><path d="M16 46a14 14 0 0 1-1.6-27.9A18 18 0 0 1 49 16.3 13 13 0 0 1 50 46z" fill="url(#g-nuvem2)"/><path d="M32 37V21M25 27.5l7-7 7 7" fill="none" stroke="#0a0a0a" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <b>Arraste a planilha aqui ou clique para escolher</b>
-            <small>.xlsx ou .xls</small>
-          </label>
-          <div class="arquivo oculto" id="sel-xls"></div>
-        </article>
+        </footer>
       </div>
+    </div>
 
-      <div class="acoes">
-        <button class="botao" type="submit" id="enviar" disabled>Enviar para o Benjamim</button>
-        <span class="nota" id="nota">Escolha pelo menos um arquivo.</span>
-      </div>
-    </form>
+    <script type="module">
+      // Os arquivos não sobem: o navegador lê o PDF (texto) e a planilha (linhas) e manda só isso ao portal.
+      // Assim o PDF de 50 MB das ofertas vira uns 20 KB de texto e não esbarra no limite de 4,5 MB da Vercel.
+      const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/';
+      const SHEETJS = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+      const LIMITE = 150 * 1024 * 1024;
+      const TIPOS = { pdf: /\.pdf$/i, xls: /\.xlsx?$/i };
+      const aviso = document.getElementById('aviso');
+      const resultado = document.getElementById('resultado');
+      const btn = document.getElementById('enviar');
+      const nota = document.getElementById('nota');
+      const entradas = { pdf: document.getElementById('arq-pdf'), xls: document.getElementById('arq-xls') };
 
-    <section class="historico">
-      <h3>Últimos envios da equipe</h3>
-      <ul id="lista" class="vidro-cartao"><li class="vazio">Carregando…</li></ul>
-    </section>
-  </main>
+      // Sem sessão, volta para o login
+      fetch('/api/sessao')
+        .then(async r => {
+          if (!r.ok) return location.replace('/');
+          const d = await r.json();
+          document.getElementById('quem').textContent = d.usuario;
+          document.getElementById('corpo').classList.remove('oculto');
+          carregarHist();
+        })
+        .catch(() => location.replace('/'));
 
-  <footer class="rodape-portal">
-    <div class="dentro"><span>Imbatível Atacadista · Jataizinho/PR</span><span>Portal do Benjamim · Matte</span></div>
-  </footer>
-  </div>
+      document.getElementById('sair').addEventListener('click', async () => {
+        await fetch('/api/sessao', { method: 'DELETE' }).catch(() => {});
+        location.replace('/');
+      });
 
-  <script type="module">
-    // Os arquivos não sobem: o navegador lê o PDF (texto) e a planilha (linhas) e manda só isso ao portal.
-    // Assim o PDF de 50 MB das ofertas vira uns 20 KB de texto e não esbarra no limite de 4,5 MB da Vercel.
-    const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/';
-    const SHEETJS = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
-    const LIMITE = 150 * 1024 * 1024;
-    const TIPOS = { pdf: /\.pdf$/i, xls: /\.xlsx?$/i };
-    const aviso = document.getElementById('aviso');
-    const resultado = document.getElementById('resultado');
-    const btn = document.getElementById('enviar');
-    const nota = document.getElementById('nota');
-    const entradas = { pdf: document.getElementById('arq-pdf'), xls: document.getElementById('arq-xls') };
+      const kb = b =>
+        b > 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+      const esc = s =>
+        String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
-    // Sem sessão, volta para o login
-    fetch('/api/sessao').then(async r => {
-      if (!r.ok) return location.replace('/');
-      const d = await r.json();
-      document.getElementById('quem').textContent = d.usuario;
-      document.getElementById('corpo').classList.remove('oculto');
-      carregarHist();
-    }).catch(() => location.replace('/'));
+      function mostrarAviso(tipo, msg) {
+        aviso.className = 'aviso ' + tipo;
+        aviso.textContent = msg;
+        aviso.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
 
-    document.getElementById('sair').addEventListener('click', async () => {
-      await fetch('/api/sessao', { method: 'DELETE' }).catch(() => {});
-      location.replace('/');
-    });
+      function atualizar() {
+        let qtd = 0,
+          grande = false;
+        for (const [alvo, inp] of Object.entries(entradas)) {
+          const f = inp.files[0];
+          const caixa = document.getElementById('sel-' + alvo);
+          if (!f) {
+            caixa.classList.add('oculto');
+            continue;
+          }
+          qtd++;
+          if (f.size > LIMITE) grande = true;
+          caixa.innerHTML = '';
+          const info = document.createElement('div');
+          info.className = 'info';
+          const nome = document.createElement('div');
+          nome.className = 'nome';
+          nome.textContent = f.name;
+          const tam = document.createElement('div');
+          tam.className = 'tam';
+          tam.textContent = kb(f.size);
+          info.append(nome, tam);
+          const tirar = document.createElement('button');
+          tirar.type = 'button';
+          tirar.className = 'tirar';
+          tirar.setAttribute('aria-label', 'Tirar arquivo');
+          tirar.textContent = '✕';
+          tirar.onclick = () => {
+            inp.value = '';
+            atualizar();
+          };
+          caixa.append(info, tirar);
+          caixa.classList.remove('oculto');
+        }
+        btn.disabled = qtd === 0 || grande;
+        nota.textContent =
+          qtd === 0
+            ? 'Escolha pelo menos um arquivo.'
+            : grande
+              ? 'Arquivo grande demais (mais de 150 MB). Confira se é o arquivo certo.'
+              : qtd === 2
+                ? 'Os dois arquivos vão juntos.'
+                : 'Pronto para enviar.';
+      }
 
-    const kb = b => b > 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
-    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      function aceitar(alvo, arquivo) {
+        if (!TIPOS[alvo].test(arquivo.name)) {
+          mostrarAviso(
+            'erro',
+            alvo === 'pdf'
+              ? 'Esse campo aceita só arquivo PDF.'
+              : 'Esse campo aceita só planilha Excel (.xlsx ou .xls).'
+          );
+          return false;
+        }
+        return true;
+      }
 
-    function mostrarAviso(tipo, msg) {
-      aviso.className = 'aviso ' + tipo;
-      aviso.textContent = msg;
-      aviso.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function atualizar() {
-      let qtd = 0, grande = false;
       for (const [alvo, inp] of Object.entries(entradas)) {
-        const f = inp.files[0];
-        const caixa = document.getElementById('sel-' + alvo);
-        if (!f) { caixa.classList.add('oculto'); continue; }
-        qtd++; if (f.size > LIMITE) grande = true;
-        caixa.innerHTML = '';
-        const info = document.createElement('div'); info.className = 'info';
-        const nome = document.createElement('div'); nome.className = 'nome'; nome.textContent = f.name;
-        const tam = document.createElement('div'); tam.className = 'tam'; tam.textContent = kb(f.size);
-        info.append(nome, tam);
-        const tirar = document.createElement('button');
-        tirar.type = 'button'; tirar.className = 'tirar'; tirar.setAttribute('aria-label', 'Tirar arquivo'); tirar.textContent = '✕';
-        tirar.onclick = () => { inp.value = ''; atualizar(); };
-        caixa.append(info, tirar);
-        caixa.classList.remove('oculto');
-      }
-      btn.disabled = qtd === 0 || grande;
-      nota.textContent = qtd === 0 ? 'Escolha pelo menos um arquivo.'
-        : grande ? 'Arquivo grande demais (mais de 150 MB). Confira se é o arquivo certo.'
-        : qtd === 2 ? 'Os dois arquivos vão juntos.' : 'Pronto para enviar.';
-    }
-
-    function aceitar(alvo, arquivo) {
-      if (!TIPOS[alvo].test(arquivo.name)) {
-        mostrarAviso('erro', alvo === 'pdf' ? 'Esse campo aceita só arquivo PDF.' : 'Esse campo aceita só planilha Excel (.xlsx ou .xls).');
-        return false;
-      }
-      return true;
-    }
-
-    for (const [alvo, inp] of Object.entries(entradas)) {
-      inp.addEventListener('change', () => {
-        if (alvo === 'pdf') { leitura = null; valIni.value = ''; valFim.value = ''; }
-        if (inp.files[0] && !aceitar(alvo, inp.files[0])) inp.value = '';
-        atualizar();
-      });
-      const zona = inp.closest('.soltar');
-      ['dragenter', 'dragover'].forEach(ev => zona.addEventListener(ev, e => { e.preventDefault(); zona.classList.add('arrastando'); }));
-      ['dragleave', 'drop'].forEach(ev => zona.addEventListener(ev, () => zona.classList.remove('arrastando')));
-      zona.addEventListener('drop', e => {
-        e.preventDefault();
-        const f = e.dataTransfer.files[0];
-        if (!f || !aceitar(alvo, f)) return;
-        const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files;
-        atualizar();
-      });
-    }
-
-    // ---- Leitura no navegador ----
-    async function textoDoPdf(arquivo) {
-      const pdfjs = await import(PDFJS + 'pdf.min.mjs');
-      pdfjs.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.mjs';
-      const doc = await pdfjs.getDocument({ data: new Uint8Array(await arquivo.arrayBuffer()), isEvalSupported: false }).promise;
-      const paginas = [];
-      for (let p = 1; p <= doc.numPages; p++) {
-        const pg = await doc.getPage(p);
-        const tc = await pg.getTextContent();
-        paginas.push(tc.items.map(it => it.str + (it.hasEOL ? '\n' : ' ')).join(''));
-        pg.cleanup();
-      }
-      await doc.destroy();
-      return paginas;
-    }
-
-    // ---- Ofertas: leitor por regra; se o modelo do PDF for novo, leitura por IA em lotes de páginas ----
-    let leitura = null; // { chave, itens, validade, modo }: guardada para não ler de novo se faltar só a validade
-    const valIni = document.getElementById('val-ini'), valFim = document.getElementById('val-fim');
-    const paraBR = iso => iso ? iso.split('-').reverse().join('/') : '';
-    const paraISO = br => { const m = String(br || '').match(/(\d{2})\/(\d{2})\/(\d{4})/); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; };
-    const POR_LOTE = 1, AO_MESMO_TEMPO = 4; // 1 página por chamada cabe no limite de 60 s da Vercel
-
-    async function postar(url, corpo) {
-      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
-      const d = await r.json().catch(() => ({}));
-      if (r.status === 401) { location.replace('/'); throw new Error('sessão'); }
-      if (!r.ok) throw Object.assign(new Error(d.erro || 'O envio não deu certo. Tente de novo.'), { nosso: true, dados: d });
-      return d;
-    }
-
-    async function lerOfertasDoPdf(arquivo, passo) {
-      const chave = arquivo.name + '|' + arquivo.size + '|' + arquivo.lastModified;
-      if (leitura && leitura.chave === chave) return leitura;
-      passo('Lendo o PDF…');
-      const paginas = await textoDoPdf(arquivo);
-      const r = await postar('/api/ofertas', { acao: 'regras', texto: paginas.join('\f') });
-      if (r.confiavel) return (leitura = { chave, itens: r.itens, validade: r.validade, modo: 'regras' });
-      if (!r.ia_disponivel) throw Object.assign(new Error('Esse modelo de PDF é novo e a leitura por IA ainda não está ligada no portal. Avise a Matte.'), { nosso: true });
-      // uma página por chamada, 4 chamadas ao mesmo tempo
-      const lotes = [];
-      for (let i = 0; i < paginas.length; i += POR_LOTE) lotes.push(paginas.slice(i, i + POR_LOTE).map((texto, k) => ({ numero: i + k + 1, texto })));
-      const resultados = new Array(lotes.length);
-      let feitos = 0, prox = 0;
-      passo(`Modelo novo de PDF: lendo com IA (0 de ${paginas.length} páginas)…`);
-      const trabalhador = async () => {
-        while (prox < lotes.length) {
-          const n = prox++;
-          let tentativa = 0;
-          for (;;) {
-            try { resultados[n] = await postar('/api/ofertas', { acao: 'ia', paginas: lotes[n] }); break; }
-            catch (e) { if (++tentativa >= 2) throw e; }
+        inp.addEventListener('change', () => {
+          if (alvo === 'pdf') {
+            leitura = null;
+            valIni.value = '';
+            valFim.value = '';
           }
-          feitos += lotes[n].length;
-          passo(`Modelo novo de PDF: lendo com IA (${feitos} de ${paginas.length} páginas)…`);
+          if (inp.files[0] && !aceitar(alvo, inp.files[0])) inp.value = '';
+          atualizar();
+        });
+        const zona = inp.closest('.soltar');
+        ['dragenter', 'dragover'].forEach(ev =>
+          zona.addEventListener(ev, e => {
+            e.preventDefault();
+            zona.classList.add('arrastando');
+          })
+        );
+        ['dragleave', 'drop'].forEach(ev => zona.addEventListener(ev, () => zona.classList.remove('arrastando')));
+        zona.addEventListener('drop', e => {
+          e.preventDefault();
+          const f = e.dataTransfer.files[0];
+          if (!f || !aceitar(alvo, f)) return;
+          const dt = new DataTransfer();
+          dt.items.add(f);
+          inp.files = dt.files;
+          atualizar();
+        });
+      }
+
+      // ---- Leitura no navegador ----
+      async function textoDoPdf(arquivo) {
+        const pdfjs = await import(PDFJS + 'pdf.min.mjs');
+        pdfjs.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.mjs';
+        const doc = await pdfjs.getDocument({
+          data: new Uint8Array(await arquivo.arrayBuffer()),
+          isEvalSupported: false
+        }).promise;
+        const paginas = [];
+        for (let p = 1; p <= doc.numPages; p++) {
+          const pg = await doc.getPage(p);
+          const tc = await pg.getTextContent();
+          paginas.push(tc.items.map(it => it.str + (it.hasEOL ? '\n' : ' ')).join(''));
+          pg.cleanup();
         }
+        await doc.destroy();
+        return paginas;
+      }
+
+      // ---- Ofertas: leitor por regra; se o modelo do PDF for novo, leitura por IA em lotes de páginas ----
+      let leitura = null; // { chave, itens, validade, modo }: guardada para não ler de novo se faltar só a validade
+      const valIni = document.getElementById('val-ini'),
+        valFim = document.getElementById('val-fim');
+      const paraBR = iso => (iso ? iso.split('-').reverse().join('/') : '');
+      const paraISO = br => {
+        const m = String(br || '').match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
       };
-      await Promise.all(Array.from({ length: Math.min(AO_MESMO_TEMPO, lotes.length) }, trabalhador));
-      // junta os lotes sem repetir a mesma oferta
-      const vistos = new Set(), itens = [];
-      let validade = null;
-      for (const res of resultados) {
-        if (!validade && res.validade) validade = res.validade;
-        for (const it of res.itens) {
-          const k = (it.produto + '|' + it.variacoes + '|' + it.preco_oferta).toLowerCase();
-          if (!vistos.has(k)) { vistos.add(k); itens.push(it); }
+      const POR_LOTE = 1,
+        AO_MESMO_TEMPO = 4; // 1 página por chamada cabe no limite de 60 s da Vercel
+
+      async function postar(url, corpo) {
+        const r = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(corpo)
+        });
+        const d = await r.json().catch(() => ({}));
+        if (r.status === 401) {
+          location.replace('/');
+          throw new Error('sessão');
         }
+        if (!r.ok)
+          throw Object.assign(new Error(d.erro || 'O envio não deu certo. Tente de novo.'), { nosso: true, dados: d });
+        return d;
       }
-      if (!itens.length) throw Object.assign(new Error('Não achei ofertas nesse PDF, nem lendo com IA. Confira se é o PDF de ofertas.'), { nosso: true });
-      return (leitura = { chave, itens, validade, modo: 'ia' });
-    }
 
-    function carregarScript(src) {
-      return new Promise((ok, falha) => {
-        if (window.XLSX) return ok();
-        const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => falha(Object.assign(new Error('Não consegui abrir o leitor de planilhas. Confira a internet e tente de novo.'), { nosso: true }));
-        document.head.append(s);
-      });
-    }
-
-    async function linhasDaPlanilha(arquivo) {
-      await carregarScript(SHEETJS);
-      const wb = XLSX.read(await arquivo.arrayBuffer(), { type: 'array' });
-      const aba = wb.Sheets[wb.SheetNames[0]];
-      return XLSX.utils.sheet_to_json(aba, { header: 1, defval: '', raw: true });
-    }
-
-    // ---- Histórico da equipe (vem do portal) ----
-    async function carregarHist() {
-      const lista = document.getElementById('lista');
-      try {
-        const r = await fetch('/api/resumo');
-        if (!r.ok) throw new Error();
-        const { historico } = await r.json();
-        lista.innerHTML = '';
-        if (!historico.length) { lista.innerHTML = '<li class="vazio">Nenhum envio ainda.</li>'; return; }
-        for (const it of historico.slice(0, 8)) {
-          const li = document.createElement('li');
-          const p = document.createElement('span'); p.className = 'ponto';
-          const t = document.createElement('span'); t.textContent = it.arquivos.join(' + ') + ' · ' + it.usuario;
-          const q = document.createElement('span'); q.className = 'quando'; q.textContent = it.em.slice(8, 10) + '/' + it.em.slice(5, 7) + ' ' + it.em.slice(11);
-          li.append(p, t, q); lista.append(li);
-        }
-      } catch (e) { lista.innerHTML = '<li class="vazio">Não consegui carregar os envios agora.</li>'; }
-    }
-
-    function mostrarResultado(reg) {
-      const linhas = [];
-      if (reg.ofertas) {
-        const o = reg.ofertas, v = o.validade ? ` · validade ${esc(o.validade.inicio)} a ${esc(o.validade.fim)}` : '';
-        linhas.push(`<li><b>Ofertas:</b> ${o.total} ofertas${v} · ${o.mudaram.length} preços mudaram, ${o.novos.length} novas, ${o.sairam.length} saíram</li>`);
-      }
-      if (reg.tabela) {
-        const t = reg.tabela;
-        linhas.push(`<li><b>Tabela:</b> ${t.total} produtos · ${t.subiram} subiram, ${t.baixaram} baixaram, ${t.novos.length} novos, ${t.sairam.length} saíram</li>`);
-      }
-      for (const a of reg.avisos || []) linhas.push(`<li class="alerta">${esc(a)}</li>`);
-      resultado.innerHTML = `<h3>Pronto! O Benjamim já usa os preços novos.</h3><ul>${linhas.join('')}</ul><a href="/resumo">Ver o que mudou</a>`;
-      resultado.classList.remove('oculto');
-      resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    document.getElementById('form-envio').addEventListener('submit', async e => {
-      e.preventDefault();
-      const pdf = entradas.pdf.files[0], xls = entradas.xls.files[0];
-      if (!pdf && !xls) return;
-      aviso.className = 'aviso oculto'; resultado.classList.add('oculto');
-      btn.disabled = true;
-      const passo = t => { btn.innerHTML = '<span class="girando"></span>' + t; };
-      try {
-        const corpo = {};
-        if (pdf) {
-          const lido = await lerOfertasDoPdf(pdf, passo);
-          if (lido.validade && !valIni.value && !valFim.value) { valIni.value = paraISO(lido.validade.inicio); valFim.value = paraISO(lido.validade.fim); }
-          if (!valIni.value || !valFim.value) {
-            valIni.focus();
-            throw Object.assign(new Error(`Li ${lido.itens.length} ofertas, mas esse PDF não traz a validade. Preencha "Válida de" e "até" e clique em enviar de novo.`), { nosso: true });
+      async function lerOfertasDoPdf(arquivo, passo) {
+        const chave = arquivo.name + '|' + arquivo.size + '|' + arquivo.lastModified;
+        if (leitura && leitura.chave === chave) return leitura;
+        passo('Lendo o PDF…');
+        const paginas = await textoDoPdf(arquivo);
+        const r = await postar('/api/ofertas', { acao: 'regras', texto: paginas.join('\f') });
+        if (r.confiavel) return (leitura = { chave, itens: r.itens, validade: r.validade, modo: 'regras' });
+        if (!r.ia_disponivel)
+          throw Object.assign(
+            new Error('Esse modelo de PDF é novo e a leitura por IA ainda não está ligada no portal. Avise a Matte.'),
+            { nosso: true }
+          );
+        // uma página por chamada, 4 chamadas ao mesmo tempo
+        const lotes = [];
+        for (let i = 0; i < paginas.length; i += POR_LOTE)
+          lotes.push(paginas.slice(i, i + POR_LOTE).map((texto, k) => ({ numero: i + k + 1, texto })));
+        const resultados = new Array(lotes.length);
+        let feitos = 0,
+          prox = 0;
+        passo(`Modelo novo de PDF: lendo com IA (0 de ${paginas.length} páginas)…`);
+        const trabalhador = async () => {
+          while (prox < lotes.length) {
+            const n = prox++;
+            let tentativa = 0;
+            for (;;) {
+              try {
+                resultados[n] = await postar('/api/ofertas', { acao: 'ia', paginas: lotes[n] });
+                break;
+              } catch (e) {
+                if (++tentativa >= 2) throw e;
+              }
+            }
+            feitos += lotes[n].length;
+            passo(`Modelo novo de PDF: lendo com IA (${feitos} de ${paginas.length} páginas)…`);
           }
-          corpo.ofertas = { arquivo: pdf.name, itens: lido.itens, validade: { inicio: paraBR(valIni.value), fim: paraBR(valFim.value) }, modo: lido.modo };
+        };
+        await Promise.all(Array.from({ length: Math.min(AO_MESMO_TEMPO, lotes.length) }, trabalhador));
+        // junta os lotes sem repetir a mesma oferta
+        const vistos = new Set(),
+          itens = [];
+        let validade = null;
+        for (const res of resultados) {
+          if (!validade && res.validade) validade = res.validade;
+          for (const it of res.itens) {
+            const k = (it.produto + '|' + it.variacoes + '|' + it.preco_oferta).toLowerCase();
+            if (!vistos.has(k)) {
+              vistos.add(k);
+              itens.push(it);
+            }
+          }
         }
-        if (xls) { passo('Lendo a planilha…'); corpo.tabela = { arquivo: xls.name, linhas: await linhasDaPlanilha(xls) }; }
-        passo('Enviando…');
-        const d = await postar('/api/atualizar', corpo);
-        if (corpo.ofertas && corpo.ofertas.modo === 'ia') d.registro.avisos = ['Modelo novo de PDF: as ofertas foram lidas com IA. Confira em "Resumo dos preços".', ...(d.registro.avisos || [])];
-        mostrarResultado(d.registro);
-        Object.values(entradas).forEach(i => i.value = '');
-        leitura = null; valIni.value = ''; valFim.value = '';
-        carregarHist();
-      } catch (err) {
-        console.error(err);
-        mostrarAviso('erro', err.nosso ? err.message : 'Não consegui ler o arquivo. Confira se é o arquivo certo e tente de novo.');
-      } finally {
-        btn.textContent = 'Enviar para o Benjamim';
-        atualizar();
+        if (!itens.length)
+          throw Object.assign(
+            new Error('Não achei ofertas nesse PDF, nem lendo com IA. Confira se é o PDF de ofertas.'),
+            { nosso: true }
+          );
+        return (leitura = { chave, itens, validade, modo: 'ia' });
       }
-    });
-  </script>
-  <script src="assets/menu.js" defer></script>
-</body>
+
+      function carregarScript(src) {
+        return new Promise((ok, falha) => {
+          if (window.XLSX) return ok();
+          const s = document.createElement('script');
+          s.src = src;
+          s.onload = ok;
+          s.onerror = () =>
+            falha(
+              Object.assign(
+                new Error('Não consegui abrir o leitor de planilhas. Confira a internet e tente de novo.'),
+                { nosso: true }
+              )
+            );
+          document.head.append(s);
+        });
+      }
+
+      async function linhasDaPlanilha(arquivo) {
+        await carregarScript(SHEETJS);
+        const wb = XLSX.read(await arquivo.arrayBuffer(), { type: 'array' });
+        const aba = wb.Sheets[wb.SheetNames[0]];
+        return XLSX.utils.sheet_to_json(aba, { header: 1, defval: '', raw: true });
+      }
+
+      // ---- Histórico da equipe (vem do portal) ----
+      async function carregarHist() {
+        const lista = document.getElementById('lista');
+        try {
+          const r = await fetch('/api/resumo');
+          if (!r.ok) throw new Error();
+          const { historico } = await r.json();
+          lista.innerHTML = '';
+          if (!historico.length) {
+            lista.innerHTML = '<li class="vazio">Nenhum envio ainda.</li>';
+            return;
+          }
+          for (const it of historico.slice(0, 8)) {
+            const li = document.createElement('li');
+            const p = document.createElement('span');
+            p.className = 'ponto';
+            const t = document.createElement('span');
+            t.textContent = it.arquivos.join(' + ') + ' · ' + it.usuario;
+            const q = document.createElement('span');
+            q.className = 'quando';
+            q.textContent = it.em.slice(8, 10) + '/' + it.em.slice(5, 7) + ' ' + it.em.slice(11);
+            li.append(p, t, q);
+            lista.append(li);
+          }
+        } catch (e) {
+          lista.innerHTML = '<li class="vazio">Não consegui carregar os envios agora.</li>';
+        }
+      }
+
+      function mostrarResultado(reg) {
+        const linhas = [];
+        if (reg.ofertas) {
+          const o = reg.ofertas,
+            v = o.validade ? ` · validade ${esc(o.validade.inicio)} a ${esc(o.validade.fim)}` : '';
+          linhas.push(
+            `<li><b>Ofertas:</b> ${o.total} ofertas${v} · ${o.mudaram.length} preços mudaram, ${o.novos.length} novas, ${o.sairam.length} saíram</li>`
+          );
+        }
+        if (reg.tabela) {
+          const t = reg.tabela;
+          linhas.push(
+            `<li><b>Tabela:</b> ${t.total} produtos · ${t.subiram} subiram, ${t.baixaram} baixaram, ${t.novos.length} novos, ${t.sairam.length} saíram</li>`
+          );
+        }
+        for (const a of reg.avisos || []) linhas.push(`<li class="alerta">${esc(a)}</li>`);
+        resultado.innerHTML = `<h3>Pronto! O Benjamim já usa os preços novos.</h3><ul>${linhas.join('')}</ul><a href="/resumo">Ver o que mudou</a>`;
+        resultado.classList.remove('oculto');
+        resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      document.getElementById('form-envio').addEventListener('submit', async e => {
+        e.preventDefault();
+        const pdf = entradas.pdf.files[0],
+          xls = entradas.xls.files[0];
+        if (!pdf && !xls) return;
+        aviso.className = 'aviso oculto';
+        resultado.classList.add('oculto');
+        btn.disabled = true;
+        const passo = t => {
+          btn.innerHTML = '<span class="girando"></span>' + t;
+        };
+        try {
+          const corpo = {};
+          if (pdf) {
+            const lido = await lerOfertasDoPdf(pdf, passo);
+            if (lido.validade && !valIni.value && !valFim.value) {
+              valIni.value = paraISO(lido.validade.inicio);
+              valFim.value = paraISO(lido.validade.fim);
+            }
+            if (!valIni.value || !valFim.value) {
+              valIni.focus();
+              throw Object.assign(
+                new Error(
+                  `Li ${lido.itens.length} ofertas, mas esse PDF não traz a validade. Preencha "Válida de" e "até" e clique em enviar de novo.`
+                ),
+                { nosso: true }
+              );
+            }
+            corpo.ofertas = {
+              arquivo: pdf.name,
+              itens: lido.itens,
+              validade: { inicio: paraBR(valIni.value), fim: paraBR(valFim.value) },
+              modo: lido.modo
+            };
+          }
+          if (xls) {
+            passo('Lendo a planilha…');
+            corpo.tabela = { arquivo: xls.name, linhas: await linhasDaPlanilha(xls) };
+          }
+          passo('Enviando…');
+          const d = await postar('/api/atualizar', corpo);
+          if (corpo.ofertas && corpo.ofertas.modo === 'ia')
+            d.registro.avisos = [
+              'Modelo novo de PDF: as ofertas foram lidas com IA. Confira em "Resumo dos preços".',
+              ...(d.registro.avisos || [])
+            ];
+          mostrarResultado(d.registro);
+          Object.values(entradas).forEach(i => (i.value = ''));
+          leitura = null;
+          valIni.value = '';
+          valFim.value = '';
+          carregarHist();
+        } catch (err) {
+          console.error(err);
+          mostrarAviso(
+            'erro',
+            err.nosso ? err.message : 'Não consegui ler o arquivo. Confira se é o arquivo certo e tente de novo.'
+          );
+        } finally {
+          btn.textContent = 'Enviar para o Benjamim';
+          atualizar();
+        }
+      });
+    </script>
+  </body>
 </html>

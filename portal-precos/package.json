@@ -4,7 +4,9 @@
   "private": true,
   "description": "Portal com login para a Imbatível atualizar a tabela de preços e o PDF de ofertas do Benjamim; o n8n consulta os preços em /api/dados",
   "scripts": {
-    "dev": "node dev.js"
+    "dev": "node dev.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "engines": {
     "node": ">=18"
@@ -12,5 +14,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^1.14.0",
     "redis": "^5.12.1"
+  },
+  "devDependencies": {
+    "prettier": "3.10.1"
   }
 }

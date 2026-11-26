@@ -63,22 +63,31 @@ const claude = () => (cliente = cliente || new Anthropic());
 // paginas: [{ numero, texto }] → { itens (formato do portal), validade: {inicio, fim} | null }
 async function lerOfertasComIA(paginas) {
   const texto = paginas.map(p => `=== Página ${p.numero} ===\n${p.texto}`).join('\n\n');
-  const resposta = await claude().beta.messages.stream({
-    model: MODELO,
-    max_tokens: 32000,
-    betas: ['server-side-fallback-2026-07-01'],
-    fallbacks: 'default', // se o Claude Opus 5.5 recusar, a própria API refaz em outro modelo
-    output_config: { effort: 'medium', format: { type: 'json_schema', schema: SCHEMA } },
-    system: SISTEMA,
-    messages: [{ role: 'user', content: `Extraia as ofertas destas páginas:\n\n${texto}` }]
-  }).finalMessage();
+  const resposta = await claude()
+    .beta.messages.stream({
+      model: MODELO,
+      max_tokens: 32000,
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default', // se o Claude Opus 5.5 recusar, a própria API refaz em outro modelo
+      output_config: { effort: 'medium', format: { type: 'json_schema', schema: SCHEMA } },
+      system: SISTEMA,
+      messages: [{ role: 'user', content: `Extraia as ofertas destas páginas:\n\n${texto}` }]
+    })
+    .finalMessage();
 
   if (resposta.stop_reason === 'refusal') throw new Error('A IA recusou ler estas páginas');
   if (resposta.stop_reason === 'max_tokens') throw new Error('Páginas grandes demais para uma leitura');
   const bloco = resposta.content.find(b => b.type === 'text');
   const dados = JSON.parse(bloco ? bloco.text : '{}');
-  console.log(JSON.stringify({ evento: 'ofertas_ia', paginas: paginas.map(p => p.numero), itens: (dados.itens || []).length,
-    entrada: resposta.usage.input_tokens, saida: resposta.usage.output_tokens }));
+  console.log(
+    JSON.stringify({
+      evento: 'ofertas_ia',
+      paginas: paginas.map(p => p.numero),
+      itens: (dados.itens || []).length,
+      entrada: resposta.usage.input_tokens,
+      saida: resposta.usage.output_tokens
+    })
+  );
   return converter(dados);
 }
 
@@ -88,22 +97,40 @@ const dataOk = s => /^\d{2}\/\d{2}\/\d{4}$/.test(String(s || '').trim());
 function converter(dados) {
   const itens = [];
   for (const it of (dados && dados.itens) || []) {
-    const produto = String(it.produto || '').replace(/\s+/g, ' ').trim();
+    const produto = String(it.produto || '')
+      .replace(/\s+/g, ' ')
+      .trim();
     const preco = Number(it.preco_oferta);
     if (!produto || !(preco > 0)) continue;
     const faixas = (it.faixas || [])
       .filter(f => Number(f.preco) > 0 && Number(f.minimo) > 0)
       .map(f => {
-        const unidade = String(f.unidade || '').toLowerCase().trim();
-        return { condicao: `acima de ${f.minimo} ${unidade}`.trim(), minimo: Math.round(Number(f.minimo)), unidade, preco: Math.round(Number(f.preco) * 100) / 100 };
+        const unidade = String(f.unidade || '')
+          .toLowerCase()
+          .trim();
+        return {
+          condicao: `acima de ${f.minimo} ${unidade}`.trim(),
+          minimo: Math.round(Number(f.minimo)),
+          unidade,
+          preco: Math.round(Number(f.preco) * 100) / 100
+        };
       })
       .sort((a, b) => a.minimo - b.minimo);
-    const item = { produto, variacoes: String(it.variacoes || '').replace(/\s+/g, ' ').trim(), preco_oferta: Math.round(preco * 100) / 100, faixas };
+    const item = {
+      produto,
+      variacoes: String(it.variacoes || '')
+        .replace(/\s+/g, ' ')
+        .trim(),
+      preco_oferta: Math.round(preco * 100) / 100,
+      faixas
+    };
     if (Number(it.preco_de) > 0) item.preco_de = Math.round(Number(it.preco_de) * 100) / 100;
     itens.push(item);
   }
-  const validade = dataOk(dados && dados.validade_inicio) && dataOk(dados && dados.validade_fim)
-    ? { inicio: dados.validade_inicio.trim(), fim: dados.validade_fim.trim() } : null;
+  const validade =
+    dataOk(dados && dados.validade_inicio) && dataOk(dados && dados.validade_fim)
+      ? { inicio: dados.validade_inicio.trim(), fim: dados.validade_fim.trim() }
+      : null;
   return { itens, validade };
 }
 

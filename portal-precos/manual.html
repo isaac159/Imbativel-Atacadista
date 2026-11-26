@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Manual · Portal Imbatível</title>
+    <link rel="icon" href="assets/logo-imbativel-quadrado.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/estilo.css" />
+    <script src="assets/menu.js" defer></script>
+  </head>
+  <body class="oculto" id="corpo">
+    <div class="fundo">
+      <aside class="lateral" id="lateral"></aside>
+      <div class="pagina">
+        <main class="conteudo">
+          <div class="cabecalho cabecalho-linha">
+            <div>
+              <h1 class="titulo">Manual</h1>
+              <p class="sub">Ajuste um preço ou um contato sem enviar o arquivo inteiro.</p>
+            </div>
+            <div class="abas-manual" role="tablist" aria-label="O que lançar">
+              <button type="button" data-blob data-aba="precos" aria-pressed="true">Preços</button>
+              <button type="button" data-blob data-aba="contatos" aria-pressed="false">Contatos dos vendedores</button>
+            </div>
+          </div>
+
+          <div class="aviso oculto" id="aviso" role="status"></div>
+
+          <!-- ================= Aba Preços ================= -->
+          <section id="aba-precos">
+            <div class="info-caixa">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 11v5M12 8h.01" />
+              </svg>
+              <p>
+                O <b>preço de tabela</b> lançado aqui vale na hora e fica até a próxima <b>tabela de preços</b> enviada
+                em Atualizar arquivos, que substitui tudo. A <b>oferta</b> lançada aqui some sozinha no fim da validade.
+              </p>
+            </div>
+
+            <div class="manual-grade">
+              <article class="vidro-cartao cartao-manual">
+                <div class="cartao-cab">
+                  <h2>Novo lançamento</h2>
+                  <div class="abas-tipo" role="tablist" aria-label="Tipo de preço">
+                    <button type="button" data-blob data-tipo="tabela" aria-pressed="true">Preço de tabela</button>
+                    <button type="button" data-blob data-tipo="oferta" aria-pressed="false">Oferta</button>
+                  </div>
+                </div>
+
+                <form class="form-manual" id="form-preco" autocomplete="off" novalidate>
+                  <div class="campo-m">
+                    <label for="produto">Produto</label>
+                    <div class="busca-produto">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="m20 20-3.5-3.5" />
+                      </svg>
+                      <input
+                        id="produto"
+                        placeholder="Busque pelo nome ou código"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="false"
+                        aria-controls="sugestoes"
+                        maxlength="160"
+                      />
+                      <ul class="sugestoes oculto" id="sugestoes" role="listbox"></ul>
+                    </div>
+                    <small id="dica-produto"></small>
+                    <div class="escolhido oculto" id="escolhido"></div>
+                  </div>
+
+                  <!-- só no preço de tabela -->
+                  <div class="linha-campos quatro" data-so="tabela">
+                    <div class="campo-m">
+                      <label for="codigo">Código</label>
+                      <input id="codigo" placeholder="opcional" maxlength="30" />
+                    </div>
+                    <div class="campo-m">
+                      <label for="unidade">Unidade</label>
+                      <input id="unidade" placeholder="UN" list="unidades" maxlength="20" />
+                      <datalist id="unidades">
+                        <option value="UN"></option>
+                        <option value="CX"></option>
+                        <option value="PC"></option>
+                        <option value="FD"></option>
+                        <option value="PCT"></option>
+                        <option value="DP"></option>
+                      </datalist>
+                    </div>
+                    <div class="campo-m">
+                      <label for="embalagem">Embalagem</label>
+                      <input id="embalagem" placeholder="ex.: 12X350ML" maxlength="60" />
+                    </div>
+                    <div class="campo-m">
+                      <label for="preco-tabela">Preço (R$)</label>
+                      <input id="preco-tabela" class="preco" inputmode="decimal" placeholder="0,00" maxlength="12" />
+                    </div>
+                  </div>
+
+                  <!-- só na oferta -->
+                  <div class="campo-m oculto" data-so="oferta">
+                    <label for="variacoes">Sabores, tipos ou observação</label>
+                    <input id="variacoes" placeholder="opcional · ex.: Tradicional e Zero" maxlength="300" />
+                  </div>
+                  <div class="linha-campos oculto" data-so="oferta">
+                    <div class="campo-m">
+                      <label for="preco-oferta">Preço por unidade (R$)</label>
+                      <input id="preco-oferta" class="preco" inputmode="decimal" placeholder="0,00" maxlength="12" />
+                    </div>
+                    <div class="campo-m">
+                      <label for="val-ini">Válida de</label>
+                      <input id="val-ini" type="date" />
+                    </div>
+                    <div class="campo-m">
+                      <label for="val-fim">até</label>
+                      <input id="val-fim" type="date" />
+                    </div>
+                  </div>
+                  <div class="campo-m oculto" data-so="oferta">
+                    <span class="rotulo">Preço por quantidade <small>(opcional)</small></span>
+                    <div class="faixas-manual" id="faixas"></div>
+                    <button class="botao-texto" type="button" id="mais-faixa">+ Adicionar faixa "acima de"</button>
+                  </div>
+
+                  <button class="botao largo" type="submit">Adicionar à lista</button>
+                  <div class="estado-m" id="estado-form" role="status"></div>
+                </form>
+              </article>
+
+              <article class="vidro-cartao cartao-manual">
+                <div class="cartao-cab">
+                  <h2>Lista para enviar</h2>
+                  <span class="contador" id="contador">0 itens</span>
+                </div>
+                <div class="fila" id="fila"></div>
+                <div class="acoes">
+                  <button class="botao" type="button" id="enviar" disabled>Enviar para o Benjamim</button>
+                  <span class="nota" id="nota">Adicione pelo menos um preço.</span>
+                </div>
+              </article>
+            </div>
+
+            <section class="secao">
+              <div class="secao-cab">
+                <div>
+                  <h2>Ofertas manuais no ar</h2>
+                  <p>Valem junto com as ofertas do PDF. Cada uma sai sozinha no fim da validade.</p>
+                </div>
+              </div>
+              <ul class="lista-manual vidro-cartao" id="ofertas-manuais">
+                <li class="vazio">Carregando…</li>
+              </ul>
+            </section>
+          </section>
+
+          <!-- ================= Aba Contatos ================= -->
+          <section id="aba-contatos" class="oculto">
+            <div class="info-caixa">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 11v5M12 8h.01" />
+              </svg>
+              <p>
+                O Benjamim reconhece o cliente pelo <b>WhatsApp</b> e passa para o vendedor certo. O contato lançado
+                aqui vale na hora e continua valendo quando a lista em PDF do vendedor for enviada de novo. Se o número
+                vier na lista nova, ele sai daqui sozinho.
+              </p>
+            </div>
+
+            <div class="manual-grade">
+              <article class="vidro-cartao cartao-manual">
+                <div class="cartao-cab"><h2>Novo contato</h2></div>
+                <form class="form-manual" id="form-contato" autocomplete="off" novalidate>
+                  <div class="campo-m" id="campo-vendedor">
+                    <span class="rotulo">Vendedor</span>
+                    <div class="escolha-vendedor" id="escolha-vendedor" role="radiogroup" aria-label="Vendedor"></div>
+                  </div>
+                  <div class="linha-campos">
+                    <div class="campo-m">
+                      <label for="c-nome">Nome do cliente</label>
+                      <input id="c-nome" placeholder="Quem fala no WhatsApp" maxlength="80" />
+                    </div>
+                    <div class="campo-m">
+                      <label for="c-tel">WhatsApp</label>
+                      <input id="c-tel" type="tel" inputmode="tel" placeholder="(43) 9 0000-0000" maxlength="25" />
+                    </div>
+                  </div>
+                  <div class="campo-m">
+                    <label for="c-estab">Estabelecimento</label>
+                    <input id="c-estab" placeholder="opcional · ex.: Mercado São José" maxlength="120" />
+                    <small>Digite o WhatsApp com DDD. Sem DDD, o portal usa 43.</small>
+                  </div>
+                  <button class="botao largo" type="submit">Salvar contato</button>
+                  <div class="estado-m" id="estado-contato" role="status"></div>
+                </form>
+              </article>
+
+              <article class="vidro-cartao cartao-manual">
+                <div class="cartao-cab">
+                  <h2>Contatos lançados</h2>
+                  <span class="contador" id="contador-contatos">0 contatos</span>
+                </div>
+                <ul class="lista-manual" id="contatos-manuais"></ul>
+              </article>
+            </div>
+          </section>
+
+          <section class="historico">
+            <h3>Últimos lançamentos manuais</h3>
+            <ul id="registro" class="vidro-cartao">
+              <li class="vazio">Carregando…</li>
+            </ul>
+          </section>
+        </main>
+
+        <footer class="rodape-portal">
+          <div class="dentro">
+            <span>Imbatível Atacadista · Jataizinho/PR</span><span>Portal do Benjamim · Matte</span>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script type="module">
+      // Aba Manual: o que for lançado aqui vai para /api/manual (lógica em api/_manual.js).
+      // Preços entram numa lista e sobem juntos; contatos são salvos na hora.
+      const $ = id => document.getElementById(id);
+      const esc = s =>
+        String(s == null ? '' : s).replace(
+          /[&<>"]/g,
+          c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]
+        );
+      const real = v =>
+        typeof v === 'number' ? v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '–';
+      const norm = s =>
+        String(s || '')
+          .normalize('NFD')
+          .replace(/[̀-ͯ]/g, '')
+          .toLowerCase();
+      const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+      const quando = s =>
+        /^\d{4}-\d{2}-\d{2} /.test(s || '') ? `${s.slice(8, 10)}/${s.slice(5, 7)} às ${s.slice(11, 16)}` : s || '';
+      const paraBR = s => (s ? s.split('-').reverse().join('/') : '');
+      const paraISO = s => {
+        const m = String(s || '').match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+      };
+      // "1.099,90" / "4,5" / "4.5" → número
+      const lerPreco = s => {
+        const t = String(s || '')
+          .replace(/[^\d.,]/g, '')
+          .trim();
+        if (!t) return NaN;
+        return parseFloat(t.includes(',') ? t.replace(/\./g, '').replace(',', '.') : t);
+      };
+      // mesmas chaves do servidor (api/_leitura.js) para achar o produto certo
+      const chaveTabela = it =>
+        (it.codigo ? 'c:' + it.codigo : 'n:' + it.nome.toUpperCase()) + '|' + (it.embalagem || '').toUpperCase();
+      const chaveOferta = it => (it.produto + '|' + (it.variacoes || '')).toUpperCase();
+      const ICONE_X =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+      const CHAVE_FILA = 'portal-manual-fila';
+
+      let D = null; // estado vindo do /api/manual
+      let tipo = 'tabela';
+      let escolhido = null; // produto escolhido na busca
+      let vendedor = '';
+      let fila = [];
+      try {
+        fila = JSON.parse(localStorage.getItem(CHAVE_FILA) || '[]');
+      } catch (e) {
+        fila = [];
+      }
+
+      // ---------- sessão ----------
+      fetch('/api/sessao')
+        .then(async r => {
+          if (!r.ok) return location.replace('/');
+          $('quem').textContent = (await r.json()).usuario;
+          $('corpo').classList.remove('oculto');
+          mostrarAba(location.hash === '#contatos' ? 'contatos' : 'precos');
+          carregar();
+        })
+        .catch(() => location.replace('/'));
+
+      $('sair').addEventListener('click', async () => {
+        await fetch('/api/sessao', { method: 'DELETE' }).catch(() => {});
+        location.replace('/');
+      });
+
+      async function carregar() {
+        try {
+          const r = await fetch('/api/manual');
+          if (r.status === 401) return location.replace('/');
+          if (!r.ok) throw new Error();
+          D = await r.json();
+          prepararFormulario();
+          desenharTudo();
+        } catch (e) {
+          aviso('erro', 'Não consegui carregar os dados agora. Atualize a página em alguns minutos.');
+        }
+      }
+
+      async function postar(corpo) {
+        const r = await fetch('/api/manual', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(corpo)
+        });
+        if (r.status === 401) {
+          location.replace('/');
+          throw new Error('sessão');
+        }
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw Object.assign(new Error(d.erro || 'Não deu certo. Tente de novo.'), { nosso: true, dados: d });
+        if (d.estado) D = d.estado;
+        return d;
+      }
+
+      function aviso(classe, msg) {
+        const el = $('aviso');
+        el.className = 'aviso ' + classe;
+        el.textContent = msg;
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function estado(id, classe, msg) {
+        $(id).className = 'estado-m ' + classe;
+        $(id).textContent = msg;
+      }
+
+      function desenharTudo() {
+        desenharFila();
+        desenharOfertasManuais();
+        desenharVendedores();
+        desenharContatos();
+        desenharRegistro();
+      }
+
+      // ---------- abas ----------
+      function mostrarAba(aba) {
+        document
+          .querySelectorAll('[data-aba]')
+          .forEach(b => b.setAttribute('aria-pressed', String(b.dataset.aba === aba)));
+        $('aba-precos').classList.toggle('oculto', aba !== 'precos');
+        $('aba-contatos').classList.toggle('oculto', aba !== 'contatos');
+        history.replaceState(null, '', aba === 'contatos' ? '#contatos' : location.pathname);
+        $('aviso').className = 'aviso oculto';
+      }
+      document
+        .querySelectorAll('[data-aba]')
+        .forEach(b => b.addEventListener('click', () => mostrarAba(b.dataset.aba)));
+
+      function mudarTipo(novo) {
+        tipo = novo;
+        document
+          .querySelectorAll('[data-tipo]')
+          .forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tipo === tipo)));
+        document.querySelectorAll('[data-so]').forEach(el => el.classList.toggle('oculto', el.dataset.so !== tipo));
+        limparFormulario(false);
+      }
+      document
+        .querySelectorAll('[data-tipo]')
+        .forEach(b => b.addEventListener('click', () => mudarTipo(b.dataset.tipo)));
+
+      // ---------- formulário de preço ----------
+      const campos = ['produto', 'codigo', 'unidade', 'embalagem', 'preco-tabela', 'variacoes', 'preco-oferta'];
+
+      function prepararFormulario() {
+        if (!$('val-ini').value) limparFormulario(false);
+      }
+
+      // validade padrão da oferta: de hoje até o fim das ofertas do PDF (se ainda valem)
+      function validadePadrao() {
+        $('val-ini').value = D ? D.hoje : '';
+        const pdf = D && D.ofertas;
+        $('val-fim').value = pdf && pdf.situacao !== 'vencida' && pdf.validade ? paraISO(pdf.validade.fim) : '';
+      }
+
+      function limparFormulario(focar = true) {
+        campos.forEach(id => {
+          $(id).value = '';
+          $(id).classList.remove('invalido');
+        });
+        $('faixas').innerHTML = '';
+        atualizarBotaoFaixa();
+        escolher(null);
+        validadePadrao();
+        $('dica-produto').textContent =
+          tipo === 'tabela'
+            ? 'Se o produto já está na tabela, o preço atual aparece aqui. Se não estiver, entra como produto novo.'
+            : 'Escolha uma oferta do PDF para trocar o preço dela, ou digite um produto para uma oferta nova.';
+        estado('estado-form', '', '');
+        if (focar) $('produto').focus();
+      }
+
+      // busca: todas as palavras digitadas precisam aparecer (nome, código, embalagem)
+      function buscar(texto) {
+        const palavras = norm(texto).split(/\s+/).filter(Boolean);
+        if (!palavras.length || !D) return [];
+        const bate = t => palavras.every(p => t.includes(p));
+        const daTabela = D.tabela
+          .filter(it => bate(norm(`${it.codigo} ${it.nome} ${it.embalagem}`)))
+          .slice(0, 8)
+          .map(it => ({ origem: 'tabela', item: it }));
+        if (tipo === 'tabela') return daTabela;
+        // ofertas do PDF só enquanto ainda valem (vencidas não adianta trocar)
+        const pdfVale = D.ofertas.situacao !== 'vencida';
+        const doPdf = (pdfVale ? D.ofertas.itens : [])
+          .filter(it => bate(norm(`${it.produto} ${it.variacoes}`)))
+          .slice(0, 6)
+          .map(it => ({ origem: 'pdf', item: it }));
+        return [...doPdf, ...daTabela.slice(0, 4)];
+      }
+
+      let opcoes = [];
+      let ativa = -1;
+      function abrirSugestoes() {
+        const texto = $('produto').value.trim();
+        opcoes = texto.length >= 2 ? buscar(texto) : [];
+        ativa = -1;
+        const ul = $('sugestoes');
+        if (texto.length < 2) return fecharSugestoes();
+        ul.innerHTML = opcoes.length
+          ? opcoes
+              .map((o, i) => {
+                const it = o.item;
+                if (o.origem === 'pdf')
+                  return `<li role="option" data-i="${i}"><span class="s-nome">${esc(it.produto)}<small>Oferta do PDF${it.variacoes ? ' · ' + esc(it.variacoes) : ''}</small></span><span class="s-preco">${real(it.preco_oferta)}</span></li>`;
+                return `<li role="option" data-i="${i}"><span class="s-nome">${esc(it.nome)}<small>${[it.codigo && 'Cód. ' + it.codigo, it.unidade, it.embalagem].filter(Boolean).map(esc).join(' · ')}${tipo === 'oferta' ? ' · preço de tabela' : ''}</small></span><span class="s-preco">${real(it.preco)}</span></li>`;
+              })
+              .join('')
+          : `<li class="s-vazio">Não está ${tipo === 'tabela' ? 'na tabela' : 'nas ofertas nem na tabela'}: vai entrar como produto novo.</li>`;
+        ul.classList.remove('oculto');
+        $('produto').setAttribute('aria-expanded', 'true');
+      }
+      function fecharSugestoes() {
+        $('sugestoes').classList.add('oculto');
+        $('produto').setAttribute('aria-expanded', 'false');
+      }
+      function marcarAtiva(i) {
+        ativa = (i + opcoes.length) % opcoes.length;
+        $('sugestoes')
+          .querySelectorAll('li[data-i]')
+          .forEach(li => li.setAttribute('aria-selected', String(+li.dataset.i === ativa)));
+        const li = $('sugestoes').querySelector(`li[data-i="${ativa}"]`);
+        if (li) li.scrollIntoView({ block: 'nearest' });
+      }
+
+      $('produto').addEventListener('input', () => {
+        if (escolhido && $('produto').value !== nomeDe(escolhido)) escolher(null);
+        abrirSugestoes();
+      });
+      $('produto').addEventListener('keydown', e => {
+        if ($('sugestoes').classList.contains('oculto') || !opcoes.length) return;
+        if (e.key === 'ArrowDown') (e.preventDefault(), marcarAtiva(ativa + 1));
+        else if (e.key === 'ArrowUp') (e.preventDefault(), marcarAtiva(ativa - 1));
+        else if (e.key === 'Enter' && ativa >= 0) (e.preventDefault(), escolher(opcoes[ativa], true));
+        else if (e.key === 'Escape') fecharSugestoes();
+      });
+      $('produto').addEventListener('blur', () => setTimeout(fecharSugestoes, 150));
+      $('sugestoes').addEventListener('mousedown', e => {
+        const li = e.target.closest('li[data-i]');
+        if (li) (e.preventDefault(), escolher(opcoes[+li.dataset.i], true));
+      });
+
+      const nomeDe = o => (o.origem === 'pdf' ? o.item.produto : o.item.nome);
+
+      // Produto escolhido na busca: preenche os campos e mostra o preço de hoje
+      function escolher(opcao, preencher = false) {
+        escolhido = opcao;
+        const caixa = $('escolhido');
+        fecharSugestoes();
+        if (!opcao) return caixa.classList.add('oculto');
+        const it = opcao.item;
+        if (preencher) {
+          $('produto').value = nomeDe(opcao);
+          if (tipo === 'tabela') {
+            $('codigo').value = it.codigo || '';
+            $('unidade').value = it.unidade || '';
+            $('embalagem').value = it.embalagem || '';
+          } else if (opcao.origem === 'pdf') {
+            $('variacoes').value = it.variacoes || '';
+            $('preco-oferta').value = String(it.preco_oferta).replace('.', ',');
+            $('faixas').innerHTML = '';
+            (it.faixas || []).forEach(f => novaFaixa(f));
+            atualizarBotaoFaixa();
+          }
+        }
+        const texto =
+          opcao.origem === 'pdf'
+            ? `Hoje no PDF: <b>${real(it.preco_oferta)}</b>${(it.faixas || []).length ? ' · ' + it.faixas.map(f => `${esc(f.condicao)} <b>${real(f.preco)}</b>`).join(' · ') : ''}. A oferta lançada aqui toma o lugar dela.`
+            : `${tipo === 'tabela' ? 'Antes' : 'Preço de tabela'}: <b>${real(it.preco)}</b>${it.embalagem ? ' · ' + esc(it.embalagem) : ''}${it.manual ? ' · já lançado à mão' : ''}`;
+        caixa.innerHTML = `<span>${texto}</span><button type="button">trocar produto</button>`;
+        caixa.querySelector('button').onclick = () => limparFormulario();
+        caixa.classList.remove('oculto');
+        if (preencher) (tipo === 'tabela' ? $('preco-tabela') : $('preco-oferta')).focus();
+      }
+
+      // faixas "acima de N unidade por R$ x"
+      function novaFaixa(f = {}) {
+        const linha = document.createElement('div');
+        linha.className = 'faixa-linha';
+        linha.innerHTML = `<span>Acima de</span>
+          <input class="f-min" inputmode="numeric" placeholder="5" maxlength="5" value="${esc(f.minimo || '')}" aria-label="Quantidade mínima">
+          <input class="f-unid" placeholder="caixas" maxlength="40" value="${esc(f.unidade || '')}" aria-label="Unidade">
+          <span class="faixa-por">por</span>
+          <input class="f-preco preco" inputmode="decimal" placeholder="0,00" maxlength="12" value="${f.preco ? esc(String(f.preco).replace('.', ',')) : ''}" aria-label="Preço da faixa">
+          <button class="tirar-x" type="button" aria-label="Tirar faixa">${ICONE_X}</button>`;
+        linha.querySelector('.tirar-x').onclick = () => (linha.remove(), atualizarBotaoFaixa());
+        $('faixas').append(linha);
+        return linha;
+      }
+      function atualizarBotaoFaixa() {
+        $('mais-faixa').disabled = $('faixas').children.length >= 3;
+      }
+      $('mais-faixa').addEventListener('click', () => {
+        novaFaixa().querySelector('.f-min').focus();
+        atualizarBotaoFaixa();
+      });
+
+      // Confere o formulário e devolve o lançamento (ou null, marcando o campo com problema)
+      function lerFormulario() {
+        campos.forEach(id => $(id).classList.remove('invalido'));
+        const falha = (id, msg) => {
+          $(id).classList.add('invalido');
+          $(id).focus();
+          estado('estado-form', 'erro', msg);
+          return null;
+        };
+        const produto = $('produto').value.trim();
+        if (!produto) return falha('produto', 'Escolha ou digite o produto.');
+
+        if (tipo === 'tabela') {
+          const preco = lerPreco($('preco-tabela').value);
+          if (!(preco > 0)) return falha('preco-tabela', 'Digite o preço, por exemplo 15,90.');
+          const base = escolhido && escolhido.origem === 'tabela' ? escolhido.item : null;
+          return {
+            tipo: 'tabela',
+            chave: base ? chaveTabela(base) : '',
+            codigo: $('codigo').value.trim(),
+            nome: produto,
+            unidade: $('unidade').value.trim().toUpperCase(),
+            embalagem: $('embalagem').value.trim(),
+            preco: Math.round(preco * 100) / 100,
+            antes: base ? base.preco : null
+          };
+        }
+
+        const preco = lerPreco($('preco-oferta').value);
+        if (!(preco > 0)) return falha('preco-oferta', 'Digite o preço por unidade da oferta.');
+        if (!$('val-fim').value) return falha('val-fim', 'Até quando vale a oferta?');
+        if ($('val-ini').value && $('val-fim').value < $('val-ini').value)
+          return falha('val-fim', 'A data final é antes da inicial.');
+        if (D && $('val-fim').value < D.hoje) return falha('val-fim', 'Essa data já passou.');
+        const faixas = [];
+        for (const linha of $('faixas').children) {
+          const [min, unid, pr] = ['.f-min', '.f-unid', '.f-preco'].map(s => linha.querySelector(s));
+          if (!min.value.trim() && !pr.value.trim()) continue;
+          const minimo = parseInt(min.value, 10);
+          const p = lerPreco(pr.value);
+          if (!(minimo > 0) || !(p > 0)) {
+            (minimo > 0 ? pr : min).classList.add('invalido');
+            estado('estado-form', 'erro', 'Complete a faixa: a quantidade e o preço.');
+            return null;
+          }
+          faixas.push({ minimo, unidade: unid.value.trim() || 'unidades', preco: Math.round(p * 100) / 100 });
+        }
+        const doPdf = escolhido && escolhido.origem === 'pdf' ? escolhido.item : null;
+        return {
+          tipo: 'oferta',
+          substitui: doPdf ? chaveOferta(doPdf) : '',
+          produto,
+          variacoes: $('variacoes').value.trim(),
+          preco_oferta: Math.round(preco * 100) / 100,
+          faixas: faixas.sort((a, b) => a.minimo - b.minimo),
+          validade: { inicio: paraBR($('val-ini').value), fim: paraBR($('val-fim').value) },
+          antes: doPdf ? doPdf.preco_oferta : null
+        };
+      }
+
+      $('form-preco').addEventListener('submit', e => {
+        e.preventDefault();
+        const l = lerFormulario();
+        if (!l) return;
+        // o mesmo produto lançado de novo substitui o que já estava na lista
+        const igual = x =>
+          x.tipo === l.tipo &&
+          (l.tipo === 'tabela' ? (x.chave || x.nome) === (l.chave || l.nome) : chaveOferta(x) === chaveOferta(l));
+        const trocou = fila.some(igual);
+        fila = [...fila.filter(x => !igual(x)), l];
+        salvarFila();
+        desenharFila();
+        limparFormulario();
+        estado(
+          'estado-form',
+          'ok',
+          trocou ? 'Atualizado na lista.' : 'Adicionado à lista. Quando terminar, envie para o Benjamim.'
+        );
+      });
+
+      // ---------- lista para enviar ----------
+      function salvarFila() {
+        try {
+          localStorage.setItem(CHAVE_FILA, JSON.stringify(fila));
+        } catch (e) {
+          /* sem armazenamento: a lista só não sobrevive a recarregar a página */
+        }
+      }
+
+      function desenharFila(erroEm = -1) {
+        $('contador').textContent = plural(fila.length, 'item', 'itens');
+        $('enviar').disabled = !fila.length;
+        $('nota').textContent = fila.length
+          ? 'Confira e envie. Vale na hora para o Benjamim.'
+          : 'Adicione pelo menos um preço.';
+        if (!fila.length) {
+          $('fila').innerHTML =
+            '<div class="vazio-tracejado">Nada na lista ainda.<br>Os lançamentos ficam aqui até você enviar para o Benjamim.</div>';
+          return;
+        }
+        const linhas = fila.map((l, i) => {
+          const sub =
+            l.tipo === 'tabela'
+              ? [l.codigo && 'Cód. ' + l.codigo, l.unidade, l.embalagem, l.antes == null && 'produto novo'].filter(
+                  Boolean
+                )
+              : [
+                  l.variacoes,
+                  ...l.faixas.map(f => `acima de ${f.minimo} ${f.unidade}: ${real(f.preco)}`),
+                  `${l.validade.inicio} a ${l.validade.fim}`
+                ].filter(Boolean);
+          return `<tr class="${i === erroEm ? 'com-erro' : ''}">
+            <td>${esc(l.tipo === 'tabela' ? l.nome : l.produto)}<span class="sub2">${sub.map(esc).join(' · ')}</span></td>
+            <td><span class="tipo-selo ${l.tipo}">${l.tipo === 'tabela' ? 'Tabela' : 'Oferta'}</span></td>
+            <td class="num">${l.antes != null ? `<span class="antes">${real(l.antes)}</span>` : ''}${real(l.tipo === 'tabela' ? l.preco : l.preco_oferta)}</td>
+            <td class="num"><button class="tirar-x" type="button" data-i="${i}" aria-label="Tirar da lista">${ICONE_X}</button></td>
+          </tr>`;
+        });
+        $('fila').innerHTML =
+          `<table><thead><tr><th>Produto</th><th>Tipo</th><th class="num">Agora</th><th></th></tr></thead><tbody>${linhas.join('')}</tbody></table>`;
+        $('fila')
+          .querySelectorAll('.tirar-x')
+          .forEach(b =>
+            b.addEventListener('click', () => {
+              fila.splice(+b.dataset.i, 1);
+              salvarFila();
+              desenharFila();
+            })
+          );
+      }
+
+      $('enviar').addEventListener('click', async () => {
+        if (!fila.length) return;
+        const botao = $('enviar');
+        botao.disabled = true;
+        botao.innerHTML = '<span class="girando"></span>Enviando…';
+        try {
+          const itens = fila.map(({ antes, ...l }) => l);
+          const d = await postar({ acao: 'precos', itens });
+          const n = d.feitos.length;
+          fila = [];
+          salvarFila();
+          desenharTudo();
+          aviso('ok', `Pronto! ${plural(n, 'preço já vale', 'preços já valem')} para o Benjamim.`);
+        } catch (err) {
+          const i = err.dados && Number.isInteger(err.dados.item) ? err.dados.item : -1;
+          desenharFila(i);
+          aviso('erro', err.nosso ? err.message : 'Não consegui enviar agora. Tente de novo em alguns minutos.');
+        } finally {
+          botao.textContent = 'Enviar para o Benjamim';
+          botao.disabled = !fila.length;
+        }
+      });
+
+      // ---------- ofertas manuais no ar ----------
+      function desenharOfertasManuais() {
+        const ul = $('ofertas-manuais');
+        const lista = D.ofertas_manuais;
+        if (!lista.length) {
+          ul.innerHTML = '<li class="vazio">Nenhuma oferta manual no ar.</li>';
+          return;
+        }
+        ul.innerHTML = lista
+          .map(
+            o => `<li>
+              <div class="lm-info">${esc(o.produto)}${o.situacao === 'agendada' ? '<span class="selo-manual">começa ' + esc(o.validade.inicio.slice(0, 5)) + '</span>' : ''}
+                <small>${[o.variacoes, ...(o.faixas || []).map(f => `${f.condicao}: ${real(f.preco)}`)].filter(Boolean).map(esc).join(' · ')}</small></div>
+              <div class="lm-valor">${real(o.preco_oferta)}<small>${esc(o.validade.inicio.slice(0, 5))} a ${esc(o.validade.fim.slice(0, 5))}</small></div>
+              <button class="remover" type="button" data-id="${esc(o.id)}">Tirar do ar</button>
+            </li>`
+          )
+          .join('');
+        ul.querySelectorAll('.remover').forEach(b =>
+          confirmarAntes(b, 'Tirar do ar', async () => {
+            await postar({ acao: 'remover_oferta', id: b.dataset.id });
+            desenharTudo();
+            aviso('ok', 'Oferta tirada do ar. O Benjamim já não oferece mais.');
+          })
+        );
+      }
+
+      // botão de remover pede um segundo clique para confirmar
+      function confirmarAntes(botao, rotulo, acao) {
+        let tempo;
+        botao.addEventListener('click', async () => {
+          if (!botao.classList.contains('confirmar')) {
+            botao.classList.add('confirmar');
+            botao.textContent = 'Confirmar?';
+            tempo = setTimeout(() => {
+              botao.classList.remove('confirmar');
+              botao.textContent = rotulo;
+            }, 3500);
+            return;
+          }
+          clearTimeout(tempo);
+          botao.disabled = true;
+          try {
+            await acao();
+          } catch (err) {
+            botao.disabled = false;
+            aviso('erro', err.nosso ? err.message : 'Não consegui tirar agora. Tente de novo.');
+          }
+        });
+      }
+
+      // ---------- contatos ----------
+      function desenharVendedores() {
+        const caixa = $('escolha-vendedor');
+        caixa.innerHTML = '';
+        for (const v of D.vendedores) {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.setAttribute('role', 'radio');
+          b.setAttribute('aria-pressed', String(v.codigo === vendedor));
+          b.setAttribute('aria-checked', String(v.codigo === vendedor));
+          b.title = v.lista_enviada
+            ? `${v.nome}: ${v.total_lista} clientes na lista em PDF`
+            : `${v.nome}: lista em PDF ainda não enviada`;
+          b.innerHTML = `<span class="sigla-v">${esc(v.codigo)}</span><span class="nome-v">${esc(v.nome)}<small>Vendedor ${esc(v.codigo)}</small></span>`;
+          b.addEventListener('click', () => {
+            vendedor = v.codigo;
+            $('campo-vendedor').classList.remove('erro-escolha');
+            caixa.querySelectorAll('button').forEach(x => {
+              const sim = x === b;
+              x.setAttribute('aria-pressed', String(sim));
+              x.setAttribute('aria-checked', String(sim));
+            });
+            $('c-nome').focus();
+          });
+          caixa.append(window.portalBlob ? window.portalBlob(b) : b);
+        }
+      }
+
+      function desenharContatos() {
+        const ul = $('contatos-manuais');
+        const total = D.vendedores.reduce((n, v) => n + v.manuais.length, 0);
+        $('contador-contatos').textContent = plural(total, 'contato', 'contatos');
+        if (!total) {
+          ul.innerHTML =
+            '<li class="vazio">Nenhum contato lançado à mão. Os clientes das listas em PDF ficam em Clientes dos vendedores.</li>';
+          return;
+        }
+        ul.innerHTML = D.vendedores
+          .filter(v => v.manuais.length)
+          .map(
+            v =>
+              `<li class="grupo-vendedor">${esc(v.nome)} · vendedor ${esc(v.codigo)}</li>` +
+              v.manuais
+                .map(
+                  c => `<li>
+                    <div class="lm-info">${esc(c.nome)}<small>${[c.estabelecimento, 'cód. ' + c.codigo, 'lançado ' + quando(c.criado_em) + ' por ' + c.usuario].filter(Boolean).map(esc).join(' · ')}</small></div>
+                    <div class="lm-valor">${esc(c.telefone)}</div>
+                    <button class="remover" type="button" data-v="${esc(v.codigo)}" data-id="${esc(c.id)}">Tirar</button>
+                  </li>`
+                )
+                .join('')
+          )
+          .join('');
+        ul.querySelectorAll('.remover').forEach(b =>
+          confirmarAntes(b, 'Tirar', async () => {
+            await postar({ acao: 'remover_contato', vendedor: b.dataset.v, id: b.dataset.id });
+            desenharTudo();
+            aviso('ok', 'Contato tirado. O Benjamim não reconhece mais esse número por aqui.');
+          })
+        );
+      }
+
+      $('form-contato').addEventListener('submit', async e => {
+        e.preventDefault();
+        ['c-nome', 'c-tel'].forEach(id => $(id).classList.remove('invalido'));
+        const nome = $('c-nome').value.trim();
+        const telefone = $('c-tel').value.trim();
+        if (!vendedor) {
+          $('campo-vendedor').classList.add('erro-escolha');
+          return estado('estado-contato', 'erro', 'Escolha o vendedor do cliente.');
+        }
+        if (!nome)
+          return (
+            $('c-nome').classList.add('invalido'),
+            $('c-nome').focus(),
+            estado('estado-contato', 'erro', 'Falta o nome do cliente.')
+          );
+        if (telefone.replace(/\D/g, '').length < 8)
+          return (
+            $('c-tel').classList.add('invalido'),
+            $('c-tel').focus(),
+            estado('estado-contato', 'erro', 'Digite o WhatsApp com DDD.')
+          );
+
+        const botao = e.submitter || $('form-contato').querySelector('button[type="submit"]');
+        botao.disabled = true;
+        estado('estado-contato', '', 'Salvando…');
+        try {
+          const d = await postar({
+            acao: 'contato',
+            vendedor,
+            nome,
+            telefone,
+            estabelecimento: $('c-estab').value.trim()
+          });
+          const ven = D.vendedores.find(v => v.codigo === vendedor);
+          const extra = [d.corrigido && `(${d.corrigido})`, ...(d.avisos || [])].filter(Boolean).join(' ');
+          estado(
+            'estado-contato',
+            'ok',
+            `Pronto! ${d.contato.comprador} · ${d.contato.telefone} já é cliente do ${ven.nome} para o Benjamim. ${extra}`.trim()
+          );
+          ['c-nome', 'c-tel', 'c-estab'].forEach(id => ($(id).value = ''));
+          desenharContatos();
+          desenharRegistro();
+        } catch (err) {
+          estado('estado-contato', 'erro', err.nosso ? err.message : 'Não consegui salvar agora. Tente de novo.');
+          if (err.nosso && /WhatsApp|número/.test(err.message)) $('c-tel').classList.add('invalido');
+        } finally {
+          botao.disabled = false;
+        }
+      });
+
+      // ---------- registro ----------
+      function desenharRegistro() {
+        const ul = $('registro');
+        if (!D.registro.length) {
+          ul.innerHTML = '<li class="vazio">Nenhum lançamento manual ainda.</li>';
+          return;
+        }
+        ul.innerHTML = D.registro
+          .slice(0, 12)
+          .map(r => {
+            let t;
+            if (r.tipo === 'tabela')
+              t = `Preço de tabela · ${esc(r.produto)}: ${r.antes != null ? real(r.antes) + ' → ' : 'novo, '}<b>${real(r.agora)}</b>`;
+            else if (r.tipo === 'oferta')
+              t = `Oferta · ${esc(r.produto)}: <b>${real(r.agora)}</b>${r.detalhe ? ' · ' + esc(r.detalhe) : ''}`;
+            else if (r.tipo === 'contato') t = `Contato · ${esc(r.produto)} · ${esc(r.detalhe)}`;
+            else t = esc(r.produto);
+            return `<li><span class="ponto${r.tipo === 'remocao' ? ' falha' : ''}"></span><span>${t} · ${esc(r.usuario)}</span><span class="quando">${esc(quando(r.em))}</span></li>`;
+          })
+          .join('');
+      }
+
+      mudarTipo('tabela');
+      desenharFila();
+    </script>
+  </body>
+</html>

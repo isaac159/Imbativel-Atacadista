@@ -5,7 +5,11 @@ async function lerJson(req) {
   if (req.body && typeof req.body === 'object') return req.body; // Vercel já interpretou
   const partes = [];
   for await (const p of req) partes.push(p);
-  try { return JSON.parse(Buffer.concat(partes).toString('utf8') || '{}'); } catch (e) { return {}; }
+  try {
+    return JSON.parse(Buffer.concat(partes).toString('utf8') || '{}');
+  } catch (e) {
+    return {};
+  }
 }
 
 module.exports = async (req, res) => {
